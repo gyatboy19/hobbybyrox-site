@@ -90,26 +90,20 @@ footer:hover #adminFooterLink{opacity:.4}
 @media(prefers-color-scheme:dark){:root{--bg:#FFF9F5;--bg-alt:#FDECEC;--text:#4B3832;--muted:#7a5f58;--border:#E8D9D2;--surface:#FFFFFF;--accent:#C94F65;--accent-2:#B98EA7;}}
 html,body{background:var(--bg)!important}
 
+
 /* ================== MOBILE STYLES V3 (Final Fix) ================== */
 @media (max-width: 980px) {
   /* --- Force header layout AND allow overflow --- */
   header {
     overflow: visible !important; /* This is the key fix to prevent clipping */
-    /* Add a little bottom padding to make space for the badge */
-    padding-bottom: 10px; 
-    /* The clip-path property can also help prevent clipping issues */
-    clip-path: inset(0 0 -20px 0); 
+    padding-bottom: 10px; /* Add a little bottom padding to make space for the badge */
+    clip-path: inset(0 0 -20px 0); /* This can also help prevent clipping issues */
   }
   header .container.nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-  }
-
-  /* --- Fix for the Reviews Section on Mobile --- */
-  #reviews .grid {
-    grid-template-columns: 1fr; /* Stack reviews in a single column */
   }
 
   /* --- Target the brand logo specifically --- */
@@ -180,5 +174,9 @@ html,body{background:var(--bg)!important}
       grid-template-columns: 1fr;
     }
   }
-}
 
+  /* --- Fix for the Reviews Section on Mobile --- */
+  .reviews-section .grid {
+    grid-template-columns: 1fr !important; /* Stack reviews in a single column */
+  }
+}
