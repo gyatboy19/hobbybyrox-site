@@ -1,0 +1,16 @@
+{
+  "name": "hobbybyrox-sync-server",
+  "version": "1.0.0",
+  "description": "Syncs data from admin panel to GitHub repo.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "@octokit/rest": "^20.1.1"
+  }
+}

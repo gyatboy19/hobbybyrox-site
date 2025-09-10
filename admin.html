@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-t" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beheer — HobbyByRox</title>
+  <link rel="stylesheet" href="merged.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🛠️</text></svg>">
+  <style>
+    .sync-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 12px;
+      background: color-mix(in oklab, var(--surface) 90%, transparent);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      z-index: 100;
+      box-shadow: 0 -4px 20px rgba(0,0,0,.05);
+    }
+    .sync-bar .btn { padding: .8rem 1.5rem; font-size: 18px; }
+    body { padding-bottom: 80px; } /* Space for sync bar */
+  </style>
+</head>
+<body>
+  <div class="notification" id="toast"></div>
+  <div class="sync-bar">
+    <button class="btn primary" id="syncBtn">💾 Sync to Repo</button>
+  </div>
+
+  <header>
+    <div class="container nav">
+      <div style="font-weight:800">🛠️ Beheer HobbyByRox</div>
+      <div><a class="btn" href="index.html">← Terug naar site</a></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <h2>Hero-slideshow</h2>
+      <p class="lead">Upload afbeeldingen of plak externe URLs.</p>
+      <div class="card"><div class="card-body">
+        <div id="heroSlidesList"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+          <label>Upload afbeelding<input type="file" id="heroNewImage" accept="image/*" /></label>
+          <label>OF plak URL<input type="url" id="heroNewUrl" placeholder="https://..." /></label>
+        </div>
+        <button class="btn primary" id="heroAddBtn" style="margin-top:12px;">Toevoegen</button>
+      </div></div>
+    </section>
+
+    <section class="section">
+      <h2>Producten</h2>
+      <div class="grid" style="grid-template-columns: 1fr; gap:24px;">
+        <div class="card"><div class="card-body">
+          <h3>Nieuw product</h3>
+          <label>Naam<input id="npName" /></label>
+          <label>Beschrijving<textarea id="npDesc"></textarea></label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <label>Prijs (€)<input id="npPrice" type="number" step="0.01" min="0" /></label>
+            <label>Categorie<select id="npCat"><option value="seizoensboeketten">Seizoensboeketten</option><option value="tafelstuk">Tafelstuk</option><option value="bruiloft">Bruiloft</option><option value="rouw">Rouw</option></select></label>
+          </div>
+          <label>Extra info<input id="npExtra" placeholder="Bijv. Maat S/M/L" /></label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+            <label>Afbeelding 1 (upload)<input id="npImg1" type="file" accept="image/*" /></label>
+            <label>Afbeelding 1 (URL)<input id="npUrl1" type="url" /></label>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+            <label>Afbeelding 2 (upload)<input id="npImg2" type="file" accept="image/*" /></label>
+            <label>Afbeelding 2 (URL)<input id="npUrl2" type="url" /></label>
+          </div>
+          <button class="btn primary" id="addProductBtn" style="margin-top:12px;">Toevoegen</button>
+        </div></div>
+        <div class="card"><div class="card-body">
+          <h3>Bestaande producten</h3>
+          <div id="productList"></div>
+        </div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Inspiratie-afbeeldingen (3 slots)</h2>
+      <div class="grid" id="inspirationSlots">
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Backup (Import/Export)</h2>
+        <div class="grid">
+            <div class="card"><div class="card-body"><h3>Exporteren</h3><button class="btn primary" id="exportBtn">Download .json</button></div></div>
+            <div class="card"><div class="card-body"><h3>Importeren</h3><input type="file" id="importFile" accept="application/json"><button class="btn ghost" id="importBtn" style="margin-top:8px;">Importeer & Vervang</button></div></div>
+        </div>
+    </section>
+
+  </main>
+
+  <div class="modal" id="editProductModal">
+    <div class="modal-content">
+      <span class="modal-close" id="editClose">&times;</span>
+      <h3>Product bewerken</h3>
+      <label>Naam<input id="epName"></label>
+      <label>Beschrijving<textarea id="epDesc"></textarea></label>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <label>Prijs (€)<input id="epPrice" type="number" step="0.01" min="0"></label>
+        <label>Categorie<select id="epCat"><option value="seizoensboeketten">Seizoensboeketten</option><option value="tafelstuk">Tafelstuk</option><option value="bruiloft">Bruiloft</option><option value="rouw">Rouw</option></select></label>
+      </div>
+      <label>Extra info<input id="epExtra"></label>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+        <label>Afbeelding 1 (upload)<input id="epImg1" type="file" accept="image/*"></label>
+        <label>Afbeelding 1 (URL)<input id="epUrl1" type="url"></label>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+        <label>Afbeelding 2 (upload)<input id="epImg2" type="file" accept="image/*"></label>
+        <label>Afbeelding 2 (URL)<input id="epUrl2" type="url"></label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn primary" id="epSaveBtn">Opslaan</button>
+        <button class="btn danger" id="epDeleteBtn">Verwijderen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
