@@ -29,15 +29,24 @@ let galleryItems = [];
 let currentGalleryIndex = 0;
 
 function openGallery(startIndex) {
-  galleryItems = inspirationItems; // Use the already fetched inspiration items
+  galleryItems = inspirationItems || [];
   const modal = $('galleryModal');
-  const slider = modal.querySelector('.gallery-slider');
-  slider.innerHTML = ''; // Clear previous slides
+  if (!modal) return;
 
-  galleryItems.forEach((src, index) => {
+  const slider = modal.querySelector('.gallery-slider');
+  slider.innerHTML = '';
+
+  galleryItems.forEach((src, i) => {
     const slide = document.createElement('div');
     slide.className = 'gallery-slide';
-    slide.innerHTML = `<img src="${src}" alt="Inspiration ${index + 1}">`;
+    slide.innerHTML = `<img src="${src}" alt="Inspiration ${i + 1}">`;
+    slider.appendChild(slide);
+  });
+
+  currentGalleryIndex = Math.max(0, Math.min(startIndex, galleryItems.length - 1));
+  showGallerySlide(currentGalleryIndex);
+  modal.style.display = 'flex';
+}" alt="Inspiration ${index + 1}">`;
     slider.appendChild(slide);
   });
 
@@ -88,9 +97,6 @@ function populateInspiration(items) {
 
 // Inside the initializePage function in merged.js
 on('galleryModalClose', 'click', () => $('galleryModal').style.display = 'none');
-document.querySelector('.gallery-prev').addEventListener('click', () => changeGallerySlide(-1));
-document.querySelector('.gallery-next').addEventListener('click', () => changeGallerySlide(1));
-
 // ---------- CART LOGIC ----------
 let cart = getCart();
 function persistCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
@@ -247,10 +253,28 @@ function refreshProductBadges() {
 }
 
 function updateInspirationImages() {
-    const items = inspirationItems || [];
-    if ($('inspirationImage1')) $('inspirationImage1').src = items[0] || '';
-    if ($('inspirationImage2')) $('inspirationImage2').src = items[1] || '';
-    if ($('inspirationImage3')) $('inspirationImage3').src = items[2] || '';
+  const container = document.getElementById('inspiration-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  const items = Array.isArray(inspirationItems) ? inspirationItems : [];
+  if (!items.length) {
+    container.innerHTML = '<p>Geen inspiratie afbeeldingen beschikbaar.</p>';
+    return;
+  }
+
+  items.forEach((src, index) => {
+    if (!src) return;
+    const figure = document.createElement('figure');
+    figure.className = 'card';
+    figure.innerHTML = `
+      <img src="${src}" alt="Inspiratie ${index + 1}"
+           loading="lazy" decoding="async"
+           style="cursor:pointer" onclick="openGallery(${index})" />
+      <figcaption class="card-body">Inspiratie ${index + 1}</figcaption>
+    `;
+    container.appendChild(figure);
+  });
 }
 
 function updateHeroImages() {
@@ -393,6 +417,20 @@ async function initializePage() {
 
     // Admin Login (simple, no real auth)
     on('adminLoginBtn', 'click', () => window.location.href = 'admin.html');
+    // Gallery listeners
+    if (typeof on === 'function') {
+      on('galleryModalClose', 'click', () => $('galleryModal').style.display = 'none');
+      on('galleryPrevBtn', 'click', () => changeGallerySlide(-1));
+      on('galleryNextBtn', 'click', () => changeGallerySlide(1));
+    } else {
+      const closeBtn = document.getElementById('galleryModalClose');
+      const prevBtn  = document.getElementById('galleryPrevBtn');
+      const nextBtn  = document.getElementById('galleryNextBtn');
+      if (closeBtn) closeBtn.addEventListener('click', () => document.getElementById('galleryModal').style.display = 'none');
+      if (prevBtn)  prevBtn.addEventListener('click', () => changeGallerySlide(-1));
+      if (nextBtn)  nextBtn.addEventListener('click', () => changeGallerySlide(1));
+    }
+
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);
