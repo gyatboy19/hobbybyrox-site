@@ -45,7 +45,7 @@ h1{font-size:clamp(32px,4.6vw,56px);line-height:1.1;margin:10px 0 0;letter-spaci
 .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .grid{display:grid;gap:18px;grid-template-columns:repeat(3,1fr)}
 .card{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .12s,box-shadow .2s}
-.card img{width:100%;aspect-ratio:4/5;object-fit:contain;object-position:center;background:var(--surface);border-bottom:1px solid var(--border);}
+.card img {width: 100%;aspect-ratio: 4/5;object-fit: cover; /* This is the fix */object-position: center;background: var(--surface);border-bottom: 1px solid var(--border);}
 .card-body{padding:14px}.price{font-weight:800}
 .add{margin-top:auto;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-top:1px solid var(--border);background:color-mix(in oklab,var(--surface) 75%,transparent)}
 .cart-item-container{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);margin-bottom:8px}
@@ -179,3 +179,4 @@ html,body{background:var(--bg)!important}
     grid-template-columns: 1fr !important;
   }
 }
+
