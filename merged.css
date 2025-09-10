@@ -86,10 +86,13 @@ footer:hover #adminFooterLink{opacity:.4}
 #adminFooterLink:hover{opacity:1}
 .btn.icon-btn{width:44px;height:44px;padding:0;border-radius:50%;font-size:20px;position:relative;}
 .btn.icon-btn .qty-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-size:12px;line-height:1;background:var(--accent-2);color:#fff;border:2px solid var(--bg);box-shadow:var(--shadow);}
+.checkout-buttons { display: flex; gap: 10px; margin-top: 16px; }
+.checkout-buttons .btn { flex: 1; }
+.btn.whatsapp { background-color: #25D366; color: white; border-color: #25D366; }
+.btn.email { background-color: #7f8c8d; color: white; border-color: #7f8c8d; }
 :root{color-scheme:only light}
 @media(prefers-color-scheme:dark){:root{--bg:#FFF9F5;--bg-alt:#FDECEC;--text:#4B3832;--muted:#7a5f58;--border:#E8D9D2;--surface:#FFFFFF;--accent:#C94F65;--accent-2:#B98EA7;}}
 html,body{background:var(--bg)!important}
-
 
 /* ================== MOBILE STYLES V3 (Final Fix) ================== */
 @media (max-width: 980px) {
