@@ -25,6 +25,7 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:saturate(150%) blur(8px)
 .nav-links{display:flex;gap:1rem;align-items:center}
 .badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .7rem;border-radius:999px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:12px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:var(--button-padding);border-radius:999px;border:1px solid var(--border);font-weight:600;font-size:var(--button-font-size);transition:background .2s,color .2s,border-color .2s; cursor:pointer;}
+.btn svg { width: 20px; height: 20px; } /* Controls size of logos in buttons */
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn.danger{background:#e53e3e;color:#fff;border-color:#e53e3e;}
 .btn.ghost{background:color-mix(in oklab,var(--accent-2) 10%,var(--surface));color:var(--text)}
@@ -86,100 +87,7 @@ footer:hover #adminFooterLink{opacity:.4}
 #adminFooterLink:hover{opacity:1}
 .btn.icon-btn{width:44px;height:44px;padding:0;border-radius:50%;font-size:20px;position:relative;}
 .btn.icon-btn .qty-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-size:12px;line-height:1;background:var(--accent-2);color:#fff;border:2px solid var(--bg);box-shadow:var(--shadow);}
-.checkout-buttons { display: flex; gap: 10px; margin-top: 16px; }
+.checkout-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 .checkout-buttons .btn { flex: 1; }
 .btn.whatsapp { background-color: #25D366; color: white; border-color: #25D366; }
-.btn.email { background-color: #7f8c8d; color: white; border-color: #7f8c8d; }
-:root{color-scheme:only light}
-@media(prefers-color-scheme:dark){:root{--bg:#FFF9F5;--bg-alt:#FDECEC;--text:#4B3832;--muted:#7a5f58;--border:#E8D9D2;--surface:#FFFFFF;--accent:#C94F65;--accent-2:#B98EA7;}}
-html,body{background:var(--bg)!important}
-
-/* ================== MOBILE STYLES V3 (Final Fix) ================== */
-@media (max-width: 980px) {
-  /* --- Force header layout AND allow overflow --- */
-  header {
-    overflow: visible !important; /* This is the key fix to prevent clipping */
-    padding-bottom: 10px; /* Add a little bottom padding to make space for the badge */
-    clip-path: inset(0 0 -20px 0); /* This can also help prevent clipping issues */
-  }
-  header .container.nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-  }
-
-  /* --- Target the brand logo specifically --- */
-  header .container.nav .brand {
-    font-size: 18px !important;
-    flex-shrink: 0;
-  }
-
-  /* --- Force the nav links container to scroll --- */
-  header .container.nav .nav-links {
-    display: flex !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    gap: 10px;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  header .container.nav .nav-links::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* --- Force styling on ALL items inside the scrollable nav --- */
-  header .container.nav .nav-links a {
-    flex-shrink: 0;
-    font-size: 14px !important;
-    padding: 8px 12px !important;
-  }
-  
-  /* --- Specifically target the "Shop nu" button --- */
-  header .container.nav .nav-links .btn.primary {
-    padding: 8px 16px !important;
-    font-size: 14px !important;
-    min-width: auto !important;
-    height: auto !important;
-  }
-
-  /* --- Final Fix for the Cart Icon and Badge --- */
-  header .container.nav .nav-links .btn.cart {
-    position: relative;
-    overflow: visible !important;
-    z-index: 100;
-  }
-  header .container.nav .nav-links .btn.cart .cart-count {
-    position: absolute;
-    top: -4px; /* MOVED DOWN: Sits less high */
-    right: -8px;
-    background: var(--accent-2);
-    color: #fff;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
-    border: 2px solid var(--surface);
-    z-index: 999;
-  }
-  
-  /* --- General Layout Fixes --- */
-  h1 { font-size: 36px; }
-  .lead { font-size: 16px; }
-  .hero-grid, .two-col {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  @media (max-width: 480px) {
-    .grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* --- Fix for the Reviews Section on Mobile --- */
-  .reviews-section .grid {
-    grid-template-columns: 1fr !important; /* Stack reviews in a single column */
-  }
-}
+.btn.
