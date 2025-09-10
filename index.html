@@ -63,7 +63,11 @@
     <div class="container">
       <h2 style="margin:0 0 6px; font-size:32px; letter-spacing:-.02em">Inspiratie</h2>
       <p class="lead" style="margin-top:0">Ideeën voor bruiloft, tafelstyling en cadeau.</p>
-      <div class="grid" style="margin-top:18px" id="inspiration-container"></div>
+      <div class="grid" style="margin-top:18px" id="inspirationGrid">
+        <figure class="card"><img id="inspirationImage1" loading="lazy" decoding="async" src="" alt="Inspiratie afbeelding 1" /><figcaption class="card-body">Inspiratie</figcaption></figure>
+        <figure class="card"><img id="inspirationImage2" loading="lazy" decoding="async" src="" alt="Inspiratie afbeelding 2" /><figcaption class="card-body">Creativiteit</figcaption></figure>
+        <figure class="card"><img id="inspirationImage3" loading="lazy" decoding="async" src="" alt="Inspiratie afbeelding 3" /><figcaption class="card-body">Voorbeelden</figcaption></figure>
+      </div>
     </div>
   </section>
 
@@ -143,19 +147,21 @@
   </footer>
 
   <script src="merged.js"></script>
-<!-- Gallery Modal -->
-<div class="modal" id="galleryModal">
-  <div class="modal-content gallery-content">
-    <span class="modal-close" id="galleryModalClose" aria-label="Sluiten">&times;</span>
-    <div class="gallery-slider"></div>
-    <a class="gallery-prev" id="galleryPrevBtn" aria-label="Vorige">&#10094;</a>
-    <a class="gallery-next" id="galleryNextBtn" aria-label="Volgende">&#10095;</a>
-  </div>
-</div>
-</body>
-</html><a class="gallery-prev">&#10094;</a>
-    <a class="gallery-next">&#10095;</a>
+
+<!-- Inspiration Lightbox Modal -->
+<div id="lightboxModal" class="lightbox hidden">
+  <div class="lightbox-backdrop"></div>
+  <div class="lightbox-content">
+    <button class="lightbox-close" aria-label="Close">×</button>
+    <button class="lightbox-prev" aria-label="Previous">‹</button>
+    <div class="lightbox-slide-wrap">
+      <img id="lightboxImage" alt="Inspiration slide" />
+      <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+    <button class="lightbox-next" aria-label="Next">›</button>
   </div>
 </div>
 
+</body>
+</html>
 
