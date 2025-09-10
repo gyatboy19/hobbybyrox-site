@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="utf-t" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Beheer — HobbyByRox</title>
   <link rel="stylesheet" href="merged.css">
@@ -122,5 +122,17 @@
   </div>
 
   <script src="admin.js"></script>
+
+<section id="inspGallerySection">
+  <h2>Inspiration Gallery</h2>
+  <p>Add as many inspiration photos as you like. The site will show 3 at a time and open a slideshow on click.</p>
+  <div>
+    <input type="url" id="inspImageUrl" placeholder="Image URL (Cloudinary)">
+    <input type="text" id="inspImageTitle" placeholder="Title (optional)">
+    <button id="inspAddBtn">Add</button>
+  </div>
+  <ul id="inspList"></ul>
+</section>
+
 </body>
 </html>
