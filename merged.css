@@ -91,99 +91,62 @@ footer:hover #adminFooterLink{opacity:.4}
 
 html,body{background:var(--bg)!important}
 
-/* ================== MOBILE STYLES (Refined) ================== */
+/* ================== MOBILE STYLES V2 (More Specific) ================== */
 @media (max-width: 980px) {
-  /* --- Ensure the main nav container behaves --- */
-  .nav {
-    display: flex; /* Make it a flex container */
-    justify-content: space-between; /* Push logo left, nav right */
-    align-items: center; /* Vertically align items */
-    overflow: hidden; /* Prevent content from spilling outside */
-    gap: 10px; /* Add a small gap between elements if needed */
+  /* --- Force header layout --- */
+  header .container.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
   }
 
-  /* --- Brand/Logo adjustments --- */
-  .nav .brand {
-    font-size: 20px; /* Make logo text slightly smaller */
-    white-space: nowrap; /* Prevent logo from wrapping */
-    flex-shrink: 0; /* Don't let it shrink if space is tight */
-  }
-  .nav .brand span {
-      display: inline; /* Ensure the span is part of the brand name */
+  /* --- Target the brand logo specifically --- */
+  header .container.nav .brand {
+    font-size: 18px !important; /* Force a smaller font size */
+    flex-shrink: 0; /* Prevent the logo from shrinking */
   }
 
-  /* --- Navigation Links Container --- */
-  .nav-links {
-    flex-grow: 1; /* Allow it to take up available space */
-    display: flex; /* Make nav links a flex container too */
-    align-items: center; /* Vertically align the links */
-    gap: 10px; /* Space between nav items */
-    
-    overflow-x: auto; /* Enable horizontal scrolling */
-    white-space: nowrap; /* Keep all links on a single line */
-    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
-    scrollbar-width: none;    /* Hide scrollbar for Firefox */
-    padding-bottom: 5px; /* Add a bit of space below for scroll shadow if needed */
+  /* --- Force the nav links container to scroll --- */
+  header .container.nav .nav-links {
+    display: flex !important; /* Ensure it's a flex container */
+    overflow-x: auto !important; /* Force horizontal scrolling */
+    white-space: nowrap !important; /* Force items onto one line */
+    gap: 10px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
-  .nav-links::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for Chrome/Safari/Opera */
+  header .container.nav .nav-links::-webkit-scrollbar {
+    display: none;
   }
 
-  /* --- Individual Nav Links --- */
-  .nav-links a,
-  .nav-links .btn {
-    flex-shrink: 0; /* Prevent links/buttons from shrinking too much */
-    padding: 8px 12px; /* Adjust padding for better fit */
-    font-size: 14px; /* Make text slightly smaller */
+  /* --- Force styling on ALL items inside the scrollable nav --- */
+  header .container.nav .nav-links a {
+    flex-shrink: 0; /* Stop items from shrinking */
+    font-size: 14px !important;
+    padding: 8px 12px !important;
+  }
+  
+  /* --- Specifically target the "Shop nu" button --- */
+  header .container.nav .nav-links .btn.primary {
+      padding: 8px 16px !important; /* Force smaller padding */
+      font-size: 14px !important;
+      min-width: auto !important; /* Allow it to be smaller */
+      height: auto !important;
   }
 
-  /* --- Adjust the "Shop nu" button (and cart) --- */
-  .nav-links .btn.primary,
-  .nav-links .btn.cart {
-    /* Keep these visible and give them more compact styling */
-    min-width: unset; /* Remove min-width to allow shrinking */
-    padding: 8px 12px; /* Adjust padding */
-    font-size: 14px; /* Adjust font size */
-    height: auto; /* Remove fixed height */
-    line-height: 1; /* Ensure text fits well */
-  }
-
-  /* --- General Button Adjustments --- */
-  .btn {
-    padding: 10px 15px; /* Slightly smaller general buttons */
-    min-height: 40px; /* Maintain a good tap target height */
-    font-size: 15px;
-  }
-
-  /* --- Layout (from previous suggestion) --- */
-  h1 { font-size: 32px; } /* Slightly smaller heading on mobile */
-  .lead { font-size: 16px; }
-
+  /* --- General Layout Fixes --- */
+  h1 { font-size: 36px; }
   .hero-grid, .two-col {
-    grid-template-columns: 1fr; /* Stack columns vertically */
+    grid-template-columns: 1fr;
     gap: 24px;
   }
   .grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on most phones */
+    grid-template-columns: repeat(2, 1fr);
   }
   @media (max-width: 480px) {
     .grid {
-      grid-template-columns: 1fr; /* Single column on very small phones */
+      grid-template-columns: 1fr;
     }
   }
-
-  /* Optional: Adjust header padding to make space for the top bar */
-  header {
-      padding-top: 40px; /* Adjust if the top bar is pushing content down */
-  }
-}
-
-/* Optional: If the top delivery bar is a fixed element,
-   you might need this for spacing */
-.top-delivery-bar { /* Assuming this is your top delivery bar class */
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    z-index: 999; /* Ensure it stays on top */
 }
