@@ -24,6 +24,42 @@ let products = {};
 let heroSlides = [];
 let inspirationItems = [];
 
+// At the top of merged.js
+let galleryItems = [];
+let currentGalleryIndex = 0;
+
+function openGallery(startIndex) {
+  galleryItems = inspirationItems; // Use the already fetched inspiration items
+  const modal = $('galleryModal');
+  const slider = modal.querySelector('.gallery-slider');
+  slider.innerHTML = ''; // Clear previous slides
+
+  galleryItems.forEach((src, index) => {
+    const slide = document.createElement('div');
+    slide.className = 'gallery-slide';
+    slide.innerHTML = `<img src="${src}" alt="Inspiration ${index + 1}">`;
+    slider.appendChild(slide);
+  });
+
+  currentGalleryIndex = startIndex;
+  showGallerySlide(currentGalleryIndex);
+  modal.style.display = 'block';
+}
+
+function showGallerySlide(index) {
+  const slides = document.querySelectorAll('#galleryModal .gallery-slide');
+  if (index >= slides.length) { currentGalleryIndex = 0; }
+  if (index < 0) { currentGalleryIndex = slides.length - 1; }
+  
+  slides.forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentGalleryIndex);
+  });
+}
+
+function changeGallerySlide(n) {
+  showGallerySlide(currentGalleryIndex += n);
+}
+
 // ---------- CART LOGIC ----------
 let cart = getCart();
 function persistCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
@@ -329,3 +365,4 @@ async function initializePage() {
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);
+
