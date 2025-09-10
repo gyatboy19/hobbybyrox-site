@@ -1,8 +1,8 @@
 // ======================= CONFIGURATION =======================
 // PASTE YOUR CLOUDINARY AND RENDER DETAILS HERE
-const CLOUD_NAME = "YOUR_CLOUD_NAME";
-const UPLOAD_PRESET = "YOUR_UNSIGNED_PRESET";
-const SYNC_BASE = "https://YOUR-RENDER-APP.onrender.com";
+const CLOUD_NAME = "dqj5kjabl";
+const UPLOAD_PRESET = "hobbyrox_unsigned";
+const SYNC_BASE = "https://hobbybyrox-site.onrender.com";
 
 // ======================= HELPERS ============================
 function $(id) { return document.getElementById(id); }
@@ -374,5 +374,6 @@ function initializeApp() {
     renderProducts();
     $('syncBtn').addEventListener('click', syncToRepo);
 }
+
 
 document.addEventListener('DOMContentLoaded', initializeApp);
