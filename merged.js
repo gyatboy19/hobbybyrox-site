@@ -1,6 +1,7 @@
 // ---------- CONFIGURATION ----------
-// The public site fetches data directly from the GitHub repository.
 const DATA_BASE_URL = 'https://raw.githubusercontent.com/gyatboy19/hobbybyrox-site/main/data';
+const WHATSAPP_NUMBER = '31644999980'; // No + or 00
+const EMAIL_ADDRESS = 'hobbybyrox@gmail.com';
 
 // ---------- HELPERS ----------
 function $(id) { return document.getElementById(id); }
@@ -85,6 +86,19 @@ function addToCart(name, price) {
         n.classList.add('show');
         setTimeout(() => n.classList.remove('show'), 2000);
     }
+}
+
+function generateOrderMessage() {
+    if (cart.length === 0) return '';
+    let message = "Hoi! Ik wil graag het volgende bestellen:\n\n";
+    let total = 0;
+    cart.forEach(item => {
+        message += `- ${item.name} (x${item.quantity}) - €${(item.price * item.quantity).toFixed(2)}\n`;
+        total += item.price * item.quantity;
+    });
+    message += `\nTotaal: €${total.toFixed(2)}\n\n`;
+    message += "Graag hoor ik wat de volgende stappen zijn.\n\nMet vriendelijke groet,";
+    return message;
 }
 
 // ---------- UI RENDERING ----------
@@ -274,13 +288,20 @@ async function initializePage() {
         chip.addEventListener('click', () => applyFilter(chip.dataset.filter));
     });
     on('cartBtn', 'click', () => { const m = $('cartModal'); if (m) m.style.display = 'block'; });
-    on('checkoutBtn', 'click', () => {
-        if (!cart.length) { alert('Winkelwagen is leeg!'); return; }
-        const msg = cart.map(i => `${i.name} x${i.quantity}`).join(', ');
-        const messageEl = $('message');
-        if (messageEl) messageEl.value = `Bestelling: ${msg}`;
-        $('cartModal').style.display = 'none';
-        $('contact').scrollIntoView({ behavior: 'smooth' });
+
+    on('whatsappBtn', 'click', () => {
+        if (cart.length === 0) { alert('Winkelwagen is leeg!'); return; }
+        const message = generateOrderMessage();
+        const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    });
+
+    on('emailBtn', 'click', () => {
+        if (cart.length === 0) { alert('Winkelwagen is leeg!'); return; }
+        const subject = "Nieuwe bestelling via de website";
+        const body = generateOrderMessage();
+        const mailtoUrl = `mailto:${EMAIL_ADDRESS}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoUrl;
     });
     
     // Modal closing logic
