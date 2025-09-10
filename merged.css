@@ -88,10 +88,9 @@ footer:hover #adminFooterLink{opacity:.4}
 .btn.icon-btn .qty-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-size:12px;line-height:1;background:var(--accent-2);color:#fff;border:2px solid var(--bg);box-shadow:var(--shadow);}
 :root{color-scheme:only light}
 @media(prefers-color-scheme:dark){:root{--bg:#FFF9F5;--bg-alt:#FDECEC;--text:#4B3832;--muted:#7a5f58;--border:#E8D9D2;--surface:#FFFFFF;--accent:#C94F65;--accent-2:#B98EA7;}}
-
 html,body{background:var(--bg)!important}
 
-/* ================== MOBILE STYLES V2 (More Specific) ================== */
+/* ================== MOBILE STYLES (Final Version) ================== */
 @media (max-width: 980px) {
   /* --- Force header layout --- */
   header .container.nav {
@@ -99,6 +98,7 @@ html,body{background:var(--bg)!important}
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+    /* overflow: hidden; */ /* This line is removed to prevent clipping */
   }
 
   /* --- Target the brand logo specifically --- */
@@ -126,17 +126,36 @@ html,body{background:var(--bg)!important}
     font-size: 14px !important;
     padding: 8px 12px !important;
   }
-  
+
   /* --- Specifically target the "Shop nu" button --- */
   header .container.nav .nav-links .btn.primary {
-      padding: 8px 16px !important; /* Force smaller padding */
-      font-size: 14px !important;
-      min-width: auto !important; /* Allow it to be smaller */
-      height: auto !important;
+    padding: 8px 16px !important; /* Force smaller padding */
+    font-size: 14px !important;
+    min-width: auto !important; /* Allow it to be smaller */
+    height: auto !important;
   }
 
+  /* --- Fix for the Cart Icon and Badge --- */
+  header .container.nav .nav-links .btn.cart {
+    position: relative;   /* Crucial for positioning the badge */
+    overflow: visible;    /* Allow the badge to show outside the button area */
+  }
+  header .container.nav .nav-links .btn.cart .cart-count {
+    position: absolute;   /* Position the badge relative to the cart button */
+    top: -8px;            /* Move it up */
+    right: -8px;          /* Move it to the right */
+    background: var(--accent-2);
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    border: 2px solid var(--surface);
+    z-index: 10;          /* Ensure the badge sits on top */
+  }
+  
   /* --- General Layout Fixes --- */
   h1 { font-size: 36px; }
+  .lead { font-size: 16px; }
   .hero-grid, .two-col {
     grid-template-columns: 1fr;
     gap: 24px;
