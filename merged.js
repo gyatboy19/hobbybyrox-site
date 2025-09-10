@@ -60,6 +60,32 @@ function changeGallerySlide(n) {
   showGallerySlide(currentGalleryIndex += n);
 }
 
+// Find and replace your old populateInspiration function with this one
+function populateInspiration(items) {
+  const container = document.getElementById('inspiration-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  if (items.length === 0) {
+    container.innerHTML = '<p>No inspiration images available.</p>';
+    return;
+  }
+  
+  items.forEach((imageUrl, index) => {
+    if (imageUrl) {
+      const figure = document.createElement('figure');
+      figure.className = 'card';
+      // Add the onclick event here to open the gallery at the correct image
+      figure.innerHTML = `
+        <img src="${imageUrl}" alt="Inspiratie afbeelding ${index + 1}" onclick="openGallery(${index})" style="cursor: pointer;" />
+        <figcaption class="card-body">Inspiratie ${index + 1}</figcaption>
+      `;
+      container.appendChild(figure);
+    }
+  });
+}
+
 // ---------- CART LOGIC ----------
 let cart = getCart();
 function persistCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
@@ -365,4 +391,5 @@ async function initializePage() {
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);
+
 
