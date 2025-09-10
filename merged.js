@@ -86,6 +86,11 @@ function populateInspiration(items) {
   });
 }
 
+// Inside the initializePage function in merged.js
+on('galleryModalClose', 'click', () => $('galleryModal').style.display = 'none');
+document.querySelector('.gallery-prev').addEventListener('click', () => changeGallerySlide(-1));
+document.querySelector('.gallery-next').addEventListener('click', () => changeGallerySlide(1));
+
 // ---------- CART LOGIC ----------
 let cart = getCart();
 function persistCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
@@ -391,5 +396,6 @@ async function initializePage() {
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);
+
 
 
