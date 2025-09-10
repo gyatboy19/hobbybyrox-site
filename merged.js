@@ -289,6 +289,12 @@ async function initializePage() {
     });
     on('cartBtn', 'click', () => { const m = $('cartModal'); if (m) m.style.display = 'block'; });
 
+    on('checkoutBtn', 'click', () => {
+        if (cart.length === 0) { alert('Winkelwagen is leeg!'); return; }
+        const m = $('checkoutOptionsModal');
+        if (m) m.style.display = 'block';
+    });
+    
     on('whatsappBtn', 'click', () => {
         if (cart.length === 0) { alert('Winkelwagen is leeg!'); return; }
         const message = generateOrderMessage();
@@ -305,7 +311,7 @@ async function initializePage() {
     });
     
     // Modal closing logic
-    ['cartModal', 'productModal', 'modal', 'adminLoginModal'].forEach(id => {
+    ['cartModal', 'productModal', 'modal', 'adminLoginModal', 'checkoutOptionsModal'].forEach(id => {
         const modal = $(id);
         if (!modal) return;
         modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
