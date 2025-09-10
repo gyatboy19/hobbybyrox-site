@@ -376,3 +376,80 @@ function initializeApp() {
 }
 
 document.addEventListener('DOMContentLoaded', initializeApp);
+
+
+/* Inspiration Admin Enhancements */
+(function(){
+  const listEl = document.getElementById('inspList');
+  const addBtn = document.getElementById('inspAddBtn');
+  const urlEl = document.getElementById('inspImageUrl');
+  const titleEl = document.getElementById('inspImageTitle');
+
+  // Attempt to hook into existing state if present
+  let inspirationItems = (window.inspirationItems || window.__INSPIRATION__?.items || []);
+
+  function render(){
+    if(!listEl) return;
+    listEl.innerHTML = '';
+    inspirationItems.forEach((it, idx) => {
+      const li = document.createElement('li');
+      li.style.margin = '0.25rem 0';
+      li.innerHTML = \`
+        <img src="\${it.image || it.url || ''}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px">
+        <strong>\${it.title || ''}</strong>
+        <button data-act="up" data-idx="\${idx}">↑</button>
+        <button data-act="down" data-idx="\${idx}">↓</button>
+        <button data-act="del" data-idx="\${idx}">Delete</button>
+      \`;
+      listEl.appendChild(li);
+    });
+    // live preview on front-end grid if available
+    if (window.__setInspirationItems) window.__setInspirationItems(inspirationItems);
+  }
+
+  if(addBtn){
+    addBtn.addEventListener('click', ()=>{
+      const url = (urlEl && urlEl.value.trim()) || '';
+      const ttl = (titleEl && titleEl.value.trim()) || '';
+      if(!url) return;
+      inspirationItems.push({ image: url, title: ttl });
+      urlEl.value=''; titleEl.value='';
+      render();
+    });
+  }
+  if(listEl){
+    listEl.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const idx = +btn.dataset.idx;
+      const act = btn.dataset.act;
+      if (act === 'del') inspirationItems.splice(idx,1);
+      if (act === 'up' && idx>0) [inspirationItems[idx-1], inspirationItems[idx]] = [inspirationItems[idx], inspirationItems[idx-1]];
+      if (act === 'down' && idx<inspirationItems.length-1) [inspirationItems[idx+1], inspirationItems[idx]] = [inspirationItems[idx], inspirationItems[idx+1]];
+      render();
+    });
+  }
+
+  // Hook into existing save flow: if a global save function composes payload, attach ours
+  // Expose getter to be used in existing save routine
+  window.__getInspirationItems = () => inspirationItems;
+
+  // If admin already had a save button that posts to SYNC_API_URL, we expect it to read
+  // window.__getInspirationItems() or include inspirationItems in body under "inspirationItems".
+  // To be defensive, patch fetch if we detect the specific call pattern.
+  const origFetch = window.fetch;
+  window.fetch = function(resource, init){
+    try{
+      if (typeof resource === 'string' && resource.includes('/api/save-products') && init && init.body) {
+        const body = JSON.parse(init.body);
+        if (!body.inspirationItems && window.__getInspirationItems) {
+          body.inspirationItems = window.__getInspirationItems();
+          init.body = JSON.stringify(body);
+        }
+      }
+    }catch(e){}
+    return origFetch.apply(this, arguments);
+  };
+
+  // Initial render
+  render();
+})();
