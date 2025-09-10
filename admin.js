@@ -375,5 +375,4 @@ function initializeApp() {
     $('syncBtn').addEventListener('click', syncToRepo);
 }
 
-
 document.addEventListener('DOMContentLoaded', initializeApp);
