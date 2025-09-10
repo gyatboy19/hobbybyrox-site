@@ -107,6 +107,11 @@ html,body{background:var(--bg)!important}
     gap: 16px;
   }
 
+  /* --- Fix for the Reviews Section on Mobile --- */
+  #reviews .grid {
+    grid-template-columns: 1fr; /* Stack reviews in a single column */
+  }
+
   /* --- Target the brand logo specifically --- */
   header .container.nav .brand {
     font-size: 18px !important;
@@ -176,3 +181,4 @@ html,body{background:var(--bg)!important}
     }
   }
 }
+
