@@ -77,8 +77,6 @@ function getLocalPreview(file) {
 
 // ======================= SYNC TO REPO =======================
 async function syncToRepo() {
-    const health = await checkSyncHealth();
-    if (!health.ok) { return; }
     const syncBtn = $('syncBtn');
     syncBtn.disabled = true;
     syncBtn.textContent = 'Syncing...';
@@ -115,24 +113,7 @@ async function syncToRepo() {
     }
 }
 
-
-// ======================= SYNC HEALTH CHECK =======================
-async function checkSyncHealth() {
-    try {
-        const res = await fetch(`${SYNC_BASE}/`, { method: 'GET' });
-        const txt = await res.text();
-        if (!res.ok) throw new Error(`HTTP ${res.status}: ${txt}`);
-        console.log('Sync server health:', txt);
-        return { ok: true, message: txt };
-    } catch (e) {
-        console.error('Sync health failed:', e);
-        toast(`Sync server unreachable: ${e.message}`, true);
-        return { ok: false, message: e.message };
-    }
-}
-
 // ======================= UI RENDERING & LOGIC =======================
-
 
 // --- Hero Slides ---
 function renderHeroSlides() {
@@ -182,51 +163,90 @@ $('heroAddBtn').addEventListener('click', async () => {
     fileInput.value = '';
 });
 
-// --- Inspiration Items ---
-function renderInspirationSlots(){
-    const container = $('inspirationSlots');
-    if (!container) { return; }
-container.innerHTML = '';
-    for (let i = 0; i < 3; i++) {
-        const src = state.inspirationItems[i] || '';
+// --- Inspiration Items (New) ---
+/**
+ * Render all inspiration images in a grid. Each card includes buttons to
+ * move the item up/down or delete it. A note displays the total count.
+ */
+function renderInspirationSimple() {
+    const listEl = document.getElementById('inspListSimple');
+    const noteEl = document.getElementById('inspNote');
+    if (!listEl || !noteEl) return;
+    const items = state.inspirationItems || [];
+    if (items.length === 0) {
+        noteEl.textContent = 'Nog geen inspiratie-afbeeldingen toegevoegd.';
+    } else {
+        noteEl.textContent = `Totaal: ${items.length} afbeelding${items.length === 1 ? '' : 'en'}.`;
+    }
+    listEl.innerHTML = '';
+    items.forEach((src, i) => {
+        const url = typeof src === 'string' ? src : (src.image || src.url || '');
         const card = document.createElement('div');
         card.className = 'card';
+        card.style.padding = '8px';
         card.innerHTML = `
-            <img src="${src}" style="aspect-ratio:4/3; object-fit:cover; background:#eee;">
-            <div class="card-body">
-                <label>Slot ${i + 1} (upload) <input type="file" class="insp-file" data-index="${i}"></label>
-                <label>Slot ${i + 1} (URL) <input type="url" class="insp-url" data-index="${i}" value="${src.startsWith('https://') ? src : ''}"></label>
+            <img src="${url}" style="width:100%;height:140px;object-fit:cover;border-radius:8px;background:#eee">
+            <div style="display:flex;gap:6px;justify-content:space-between;margin-top:6px">
+              <div>
+                <button class="btn" data-act="up" data-i="${i}" style="padding:4px 6px;font-size:14px">↑</button>
+                <button class="btn" data-act="down" data-i="${i}" style="padding:4px 6px;font-size:14px">↓</button>
+              </div>
+              <button class="btn danger" data-act="del" data-i="${i}">Verwijderen</button>
             </div>`;
-        container.appendChild(card);
-    }
-    container.querySelectorAll('.insp-file').forEach(input => {
-        input.addEventListener('change', async e => {
-            const index = e.target.dataset.index;
-            const file = e.target.files[0];
-            if (!file) return;
-            toast(`Uploading inspiration ${parseInt(index)+1}...`);
-            const cloudinaryUrl = await uploadToCloudinary(file);
-            if (cloudinaryUrl) {
-                state.inspirationItems[index] = cloudinaryUrl;
-                toast('Upload complete!');
-            } else {
-                const localUrl = await getLocalPreview(file);
-                if (localUrl) state.inspirationItems[index] = localUrl;
-                toast('Upload failed. Using local preview.', true);
+        listEl.appendChild(card);
+    });
+    listEl.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.i);
+            const act = btn.dataset.act;
+            if (act === 'del') {
+                state.inspirationItems.splice(idx, 1);
+            } else if (act === 'up' && idx > 0) {
+                [state.inspirationItems[idx], state.inspirationItems[idx - 1]] = [state.inspirationItems[idx - 1], state.inspirationItems[idx]];
+            } else if (act === 'down' && idx < state.inspirationItems.length - 1) {
+                [state.inspirationItems[idx], state.inspirationItems[idx + 1]] = [state.inspirationItems[idx + 1], state.inspirationItems[idx]];
             }
             saveState();
-            renderInspirationSlots();
+            renderInspirationSimple();
         });
     });
-    container.querySelectorAll('.insp-url').forEach(input => {
-        input.addEventListener('input', e => {
-            const index = e.target.dataset.index;
-            state.inspirationItems[index] = e.target.value.trim();
-            saveState();
-            // No full re-render needed, just update the image src
-            e.target.closest('.card').querySelector('img').src = e.target.value;
-        });
-    });
+}
+
+/**
+ * Add new inspiration images from file input and URL input. Supports
+ * multiple file selection and uses Cloudinary for uploading.
+ */
+async function addInspiration() {
+    const fileInput = document.getElementById('inspAddFile');
+    const urlInput = document.getElementById('inspAddUrl');
+    if (!fileInput || !urlInput) return;
+    const files = Array.from(fileInput.files || []);
+    const url = urlInput.value.trim();
+    let modified = false;
+    for (const file of files) {
+        const preview = await getLocalPreview(file);
+        state.inspirationItems.push(preview);
+        modified = true;
+        try {
+            const uploaded = await uploadToCloudinary(file);
+            if (uploaded) {
+                state.inspirationItems[state.inspirationItems.length - 1] = uploaded;
+            }
+        } catch (err) {
+            console.warn('Cloudinary upload failed:', err);
+        }
+    }
+    if (url) {
+        state.inspirationItems.push(url);
+        modified = true;
+    }
+    if (modified) {
+        saveState();
+        renderInspirationSimple();
+    }
+    // Reset inputs
+    fileInput.value = '';
+    urlInput.value = '';
 }
 
 
@@ -390,108 +410,15 @@ $('importBtn').addEventListener('click', () => {
 function initializeApp() {
     loadState();
     renderHeroSlides();
-    try{ renderInspirationSlots(); }catch(e){ console.warn('renderInspirationSlots skipped:', e);}
+    // Render inspiration items using the new manager
+    renderInspirationSimple();
+    // Render products
     renderProducts();
+    // Attach sync handler
     $('syncBtn').addEventListener('click', syncToRepo);
+    // Attach inspiration add handler if present
+    const addBtn = document.getElementById('inspAddBtn');
+    if (addBtn) addBtn.addEventListener('click', addInspiration);
 }
 
 document.addEventListener('DOMContentLoaded', initializeApp);
-
-async function readAsDataURL(file){
-  return new Promise((resolve)=>{
-    const r = new FileReader();
-    r.onload = e => resolve(e.target.result);
-    r.onerror = () => resolve(null);
-    r.readAsDataURL(file);
-  });
-}
-
-/* InspirationSimpleUI */
-(function(){
-  function renderInspirationSimple(){
-    const listEl = document.getElementById('inspListSimple');
-    const noteEl = document.getElementById('inspNote');
-    if (!listEl) return;
-
-    listEl.innerHTML = '';
-    const all = state.inspirationItems || [];
-    const total = all.length;
-    const shown = all.slice(0, 3);
-
-    if (noteEl){
-      noteEl.textContent = total
-        ? (total>3 ? `Toont de eerste 3 van ${total} afbeeldingen (de slideshow bevat ze allemaal).` : `Toont ${total} afbeelding${total===1?'':'en'}.`)
-        : 'Nog geen inspiratie-afbeeldingen toegevoegd.';
-    }
-
-    shown.forEach((src, i)=>{
-      const card = document.createElement('div');
-      card.className = 'card'; card.style.padding='8px';
-      const url = typeof src === 'string' ? src : (src.image || '');
-      card.innerHTML = `
-        <img src="${url}" style="width:100%;height:140px;object-fit:cover;border-radius:8px;background:#eee">
-        <div style="display:flex;gap:6px;justify-content:space-between;margin-top:6px">
-          <div>
-            <button class="btn" data-act="up" data-i="${i}">↑</button>
-            <button class="btn" data-act="down" data-i="${i}">↓</button>
-          </div>
-          <button class="btn danger" data-act="del" data-i="${i}">Verwijderen</button>
-        </div>`;
-      listEl.appendChild(card);
-    });
-
-    // actions
-    listEl.onclick = (e)=>{
-      const btn = e.target.closest('button'); if (!btn) return;
-      const i = +btn.dataset.i; const act = btn.dataset.act; const arr = state.inspirationItems;
-      if (act === 'del'){ arr.splice(i,1); }
-      if (act === 'up' && i>0){ [arr[i-1], arr[i]] = [arr[i], arr[i-1]]; }
-      if (act === 'down' && i<Math.min(2, arr.length-1)){ [arr[i+1], arr[i]] = [arr[i], arr[i+1]]; }
-      saveState(); renderInspirationSimple();
-    };
-  }
-
-  async function addInspiration(){
-    const fileEl = document.getElementById('inspAddFile');
-    const urlEl = document.getElementById('inspAddUrl');
-    if (!fileEl || !urlEl) return;
-    const file = fileEl.files && fileEl.files[0];
-    const url = (urlEl.value || '').trim();
-
-    if (!file && !url) return;
-
-    if (file){
-      const local = await readAsDataURL(file);
-      if (local){ state.inspirationItems.push(local); saveState(); renderInspirationSimple(); }
-      try {
-        const uploaded = await uploadToCloudinary(file);
-        if (uploaded){
-          const idx = state.inspirationItems.lastIndexOf(local);
-          if (idx !== -1) state.inspirationItems[idx] = uploaded;
-          saveState(); renderInspirationSimple();
-        }
-      } catch(e){ console.warn('Upload failed', e); }
-      fileEl.value = '';
-      urlEl.value = '';
-      return;
-    }
-
-    if (url){
-      state.inspirationItems.push(url);
-      saveState(); renderInspirationSimple();
-      urlEl.value = '';
-    }
-  }
-
-  // Hook into initializeApp if present
-  const origInit = typeof initializeApp === 'function' ? initializeApp : null;
-  window.initializeApp = function(){
-    if (origInit) try { origInit(); } catch(e){}
-    renderInspirationSimple();
-    const btn = document.getElementById('inspAddBtn');
-    if (btn) btn.onclick = addInspiration;
-  };
-
-  // if initializeApp already ran, at least render now
-  document.addEventListener('DOMContentLoaded', () => { renderInspirationSimple(); const b=document.getElementById('inspAddBtn'); if (b) b.onclick = addInspiration; });
-})();
