@@ -10,10 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let allProducts = [];
 
   // Fetch all necessary data
+  const ts = new Date().getTime();
   Promise.all([
-    fetch('data/products.json').then(res => res.json()),
-    fetch('data/hero.json').then(res => res.json()),
-    fetch('data/inspiration.json').then(res => res.json())
+    fetch(`data/products.json?v=${ts}`).then(res => res.json()),
+    fetch(`data/hero.json?v=${ts}`).then(res => res.json()),
+    fetch(`data/inspiration.json?v=${ts}`).then(res => res.json())
   ])
   .then(([productsData, heroData, inspirationData]) => {
     allProducts = Object.values(productsData || {});
