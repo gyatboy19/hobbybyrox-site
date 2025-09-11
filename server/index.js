@@ -32,32 +32,67 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' })); // Allow larger payloads for potential base64 images
 
 // --- GITHUB HELPER ---
-async function upsertFile(path, content) {
-    let sha;
-    try {
-        const { data } = await octokit.repos.getContent({
-            owner: GITHUB_OWNER,
-            repo: GITHUB_REPO,
-            path,
-            ref: GITHUB_BRANCH,
-        });
-        sha = data.sha;
-    } catch (error) {
-        if (error.status !== 404) throw error;
-        // File doesn't exist, sha remains undefined
-    }
-
-    const { data: { commit } } = await octokit.repos.createOrUpdateFileContents({
+async function commitMultipleFiles(files, commitMessage) {
+    // 1. Get a reference to the branch
+    const { data: refData } = await octokit.git.getRef({
         owner: GITHUB_OWNER,
         repo: GITHUB_REPO,
-        path,
-        message: `[SYNC] Update ${path} via admin panel`,
-        content: Buffer.from(content).toString('base64'),
-        branch: GITHUB_BRANCH,
-        sha, // If sha is undefined, it's a new file
+        ref: `heads/${GITHUB_BRANCH}`,
     });
-    
-    return commit.sha;
+    const parentCommitSha = refData.object.sha;
+
+    // 2. Get the tree of the latest commit
+    const { data: parentCommitData } = await octokit.git.getCommit({
+        owner: GITHUB_OWNER,
+        repo: GITHUB_REPO,
+        commit_sha: parentCommitSha,
+    });
+    const baseTreeSha = parentCommitData.tree.sha;
+
+    // 3. Create blobs for each file
+    const fileBlobs = await Promise.all(
+        files.map(async (file) => {
+            const { data: blobData } = await octokit.git.createBlob({
+                owner: GITHUB_OWNER,
+                repo: GITHUB_REPO,
+                content: Buffer.from(file.content).toString('base64'),
+                encoding: 'base64',
+            });
+            return {
+                path: file.path,
+                mode: '100644',
+                type: 'blob',
+                sha: blobData.sha,
+            };
+        })
+    );
+
+    // 4. Create a new tree
+    const { data: treeData } = await octokit.git.createTree({
+        owner: GITHUB_OWNER,
+        repo: GITHUB_REPO,
+        base_tree: baseTreeSha,
+        tree: fileBlobs,
+    });
+
+    // 5. Create a new commit
+    const { data: commitData } = await octokit.git.createCommit({
+        owner: GITHUB_OWNER,
+        repo: GITHUB_REPO,
+        message: commitMessage,
+        tree: treeData.sha,
+        parents: [parentCommitSha],
+    });
+
+    // 6. Update the branch reference
+    await octokit.git.updateRef({
+        owner: GITHUB_OWNER,
+        repo: GITHUB_REPO,
+        ref: `heads/${GITHUB_BRANCH}`,
+        sha: commitData.sha,
+    });
+
+    return commitData.sha;
 }
 
 
@@ -74,15 +109,24 @@ app.post('/api/save-products', async (req, res) => {
             return res.status(400).json({ ok: false, message: 'Missing required data fields.' });
         }
 
-        const productsContent = JSON.stringify(products, null, 2);
-        const heroContent = JSON.stringify({ images: heroImages }, null, 2);
-        const inspirationContent = JSON.stringify({ items: inspItems }, null, 2);
+        const files = [
+            {
+                path: 'data/products.json',
+                content: JSON.stringify(products, null, 2),
+            },
+            {
+                path: 'data/hero.json',
+                content: JSON.stringify({ images: heroImages }, null, 2),
+            },
+            {
+                path: 'data/inspiration.json',
+                content: JSON.stringify({ items: inspItems }, null, 2),
+            }
+        ];
 
-        // Perform updates
-        const commitSha = await upsertFile('data/products.json', productsContent);
-        await upsertFile('data/hero.json', heroContent);
-        await upsertFile('data/inspiration.json', inspirationContent);
-        
+        const commitMessage = '[SYNC] Update data files via admin panel';
+        const commitSha = await commitMultipleFiles(files, commitMessage);
+
         res.status(200).json({ ok: true, commit: commitSha });
 
     } catch (error) {

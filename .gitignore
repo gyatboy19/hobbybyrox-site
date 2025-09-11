@@ -1,0 +1,12 @@
+# Ignore Node.js dependencies
+server/node_modules/
+
+# Ignore python cache
+__pycache__/
+
+# Ignore test artifacts
+tests/test-results/
+tests/playwright-report/
+
+# Ignore general log files
+*.log
