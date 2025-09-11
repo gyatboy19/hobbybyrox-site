@@ -1,1 +1,26 @@
-{}
+{
+  "17001": {
+    "id": "17001",
+    "name": "Seizoensboeket 'Herfstgloed'",
+    "description": "Een prachtig boeket met warme herfstkleuren. Perfect om het najaar in huis te halen.",
+    "price": 34.95,
+    "category": "seizoensboeketten",
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0507/3754/5401/files/V5670D_LOL_preset_ftd-mx-tile-wide-lv-new.jpg?v=1719404124&width=1920",
+      "https://cdn.shopify.com/s/files/1/0507/3754/5401/files/V5670D_LOL_preset_ftd-mx-tile-wide-lv-new.jpg?v=1719404124&width=1920"
+    ],
+    "thumbnail": "https://cdn.shopify.com/s/files/1/0507/3754/5401/files/V5670D_LOL_preset_ftd-mx-tile-wide-lv-new.jpg?v=1719404124&width=1920"
+  },
+  "17002": {
+    "id": "17002",
+    "name": "Tafelstuk 'Natuurlijke Elegantie'",
+    "description": "Een stijlvol tafelstuk met een mix van verse bloemen en groen. Ideaal voor diners of als decoratie.",
+    "price": 45.00,
+    "category": "tafelstuk",
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0507/3754/5401/t/1/assets/BD2D_LOL_preset_ftd-mx-tile-wide-lv-new.jpeg?v=1686668609&width=1920",
+      "https://cdn.shopify.com/s/files/1/0507/3754/5401/t/1/assets/BD2D_LOL_preset_ftd-mx-tile-wide-lv-new.jpeg?v=1686668609&width=1920"
+    ],
+    "thumbnail": "https://cdn.shopify.com/s/files/1/0507/3754/5401/t/1/assets/BD2D_LOL_preset_ftd-mx-tile-wide-lv-new.jpeg?v=1686668609&width=1920"
+  }
+}
