@@ -79,30 +79,28 @@
       </div>
     </section>
 
-    
-<section class="section" id="inspirationSimple">
-  <h2>Inspiratie-afbeeldingen</h2>
-  <div class="card" style="padding:16px;">
-    <div class="grid" style="grid-template-columns: 1fr 1fr; gap:12px;">
-      <div>
-        <label>Upload afbeelding</label>
-        <input type="file" id="inspAddFile" accept="image/*">
+    <section class="section" id="inspirationManager">
+      <h2>Inspiratie-afbeeldingen</h2>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+            <div style="flex:1; min-width:200px;">
+              <label for="inspAddFile">Upload afbeelding</label>
+              <input type="file" id="inspAddFile" accept="image/*" multiple>
+            </div>
+            <div style="flex:1; min-width:200px;">
+              <label for="inspAddUrl">OF plak URL</label>
+              <input type="url" id="inspAddUrl" placeholder="https://...">
+            </div>
+            <div>
+              <button class="btn primary" id="inspAddBtn">Toevoegen</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label>OF plak URL</label>
-        <input type="url" id="inspAddUrl" placeholder="https://...">
-      </div>
-    </div>
-    <div style="margin-top:12px;">
-      <button class="btn" id="inspAddBtn" type="button">Toevoegen</button>
-    </div>
-  </div>
-  <div style="margin-top:14px;">
-    <div id="inspNote" style="font-size:.9rem;opacity:.75;margin:0 0 8px 2px;"></div>
-    <div id="inspListSimple" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;"></div>
-  </div>
-</section>
-
+      <p id="inspNote" style="margin-top:8px; color:var(--muted); font-size:14px;"></p>
+      <div id="inspListSimple" class="grid" style="margin-top:8px;"></div>
+    </section>
 
     <section class="section">
         <h2>Backup (Import/Export)</h2>
