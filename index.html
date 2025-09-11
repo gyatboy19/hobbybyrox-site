@@ -63,10 +63,14 @@
     <div class="container">
       <h2 style="margin:0 0 6px; font-size:32px; letter-spacing:-.02em">Inspiratie</h2>
       <p class="lead" style="margin-top:0">Ideeën voor bruiloft, tafelstyling en cadeau.</p>
-      <div class="grid" style="margin-top:18px" id="inspirationGrid">
-        <figure class="card"><img id="inspirationImage1" loading="lazy" decoding="async" src="" alt="Inspiratie afbeelding 1" /><figcaption class="card-body">Inspiratie</figcaption></figure>
-        <figure class="card"><img id="inspirationImage2" loading="lazy" decoding="async" src="" alt="Inspiratie afbeelding 2" /><figcaption class="card-body">Creativiteit</figcaption></figure>
-        <figure class="card"><img id="inspirationImage3" loading="lazy" decoding="async" src="" alt="Inspiratie afbeelding 3" /><figcaption class="card-body">Voorbeelden</figcaption></figure>
+      <!-- Inspiration slideshow placeholder populated via merged.js -->
+      <div class="inspiration-slideshow" style="margin-top:18px">
+        <!-- Slides and dots are injected by the script -->
+        <div class="slideshow-container" id="inspSlides"></div>
+        <div class="slideshow-dots" id="inspDots"></div>
+        <!-- Navigation buttons -->
+        <button class="slideshow-nav prev" id="inspPrev" aria-label="Vorige afbeelding">‹</button>
+        <button class="slideshow-nav next" id="inspNext" aria-label="Volgende afbeelding">›</button>
       </div>
     </div>
   </section>
@@ -147,21 +151,14 @@
   </footer>
 
   <script src="merged.js"></script>
-
-<!-- Inspiration Lightbox Modal -->
-<div id="lightboxModal" class="lightbox hidden">
-  <div class="lightbox-backdrop"></div>
-  <div class="lightbox-content">
-    <button class="lightbox-close" aria-label="Close">×</button>
-    <button class="lightbox-prev" aria-label="Previous">‹</button>
-    <div class="lightbox-slide-wrap">
-      <img id="lightboxImage" alt="Inspiration slide" />
-      <div id="lightboxCaption" class="lightbox-caption"></div>
-    </div>
-    <button class="lightbox-next" aria-label="Next">›</button>
-  </div>
-</div>
-
+  <!-- Initialize the custom inspiration slideshow once the page and data are ready -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof initializeNewInspiration === 'function') {
+        initializeNewInspiration();
+      }
+    });
+  </script>
 </body>
 </html>
 
