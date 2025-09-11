@@ -342,14 +342,16 @@ $('epSaveBtn').addEventListener('click', async () => {
     const files = [$('epImg1').files[0], $('epImg2').files[0]];
     const newImages = [];
     for (let i = 0; i < 2; i++) {
-        if (urls[i]) {
-            newImages.push(urls[i]);
-        } else if (files[i]) {
+        // Prioritize new file uploads. If a file is selected, upload it.
+        if (files[i]) {
             const cloudinaryUrl = await uploadToCloudinary(files[i]);
-            if(cloudinaryUrl) newImages.push(cloudinaryUrl);
-        } else if (p.images && p.images[i]) {
-            // Keep old image if no new one provided
-            newImages.push(p.images[i]);
+            if (cloudinaryUrl) newImages.push(cloudinaryUrl);
+        }
+        // Otherwise, if there's a URL in the input, use that.
+        // This covers both existing images and newly pasted URLs.
+        // If the input is empty, the image is effectively removed.
+        else if (urls[i]) {
+            newImages.push(urls[i]);
         }
     }
     p.images = newImages;
