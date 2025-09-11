@@ -184,6 +184,15 @@ function updateInspirationImages() {
     if ($('inspirationImage1')) $('inspirationImage1').src = items[0] || '';
     if ($('inspirationImage2')) $('inspirationImage2').src = items[1] || '';
     if ($('inspirationImage3')) $('inspirationImage3').src = items[2] || '';
+
+    // If a custom inspiration slideshow has been initialized, refresh it to reflect new items
+    if (typeof window.refreshNewInspiration === 'function') {
+        try {
+            window.refreshNewInspiration();
+        } catch (e) {
+            console.error('Failed to refresh custom inspiration slideshow', e);
+        }
+    }
 }
 
 function updateHeroImages() {
@@ -330,136 +339,132 @@ async function initializePage() {
 
 document.addEventListener('DOMContentLoaded', initializePage);
 
+/*
+ * Custom Inspiration Slideshow Integration
+ *
+ * This module enables a dynamic slideshow for the Inspiration section when
+ * using custom markup on the page (e.g. containers with IDs `inspSlides`,
+ * `inspDots`, `inspPrev`, and `inspNext`). It will populate the slides
+ * from the global `inspirationItems` array (loaded from localStorage) and
+ * provide automatic cycling, manual navigation, and dot indicators.
+ */
+(function() {
+    let curSlide = 0;
+    let autoplayTimer = null;
 
-/* Inspiration Slideshow */
-(function(){
-  const grid = document.getElementById('inspirationGrid');
-  if(!grid) return;
-  // Expect window.__INSPIRATION__ filled by existing data loader or fetch here:
-  function fetchInspiration(){
-    if (window.__INSPIRATION__ && Array.isArray(window.__INSPIRATION__.items)) {
-      return Promise.resolve(window.__INSPIRATION__.items);
+    function getItems() {
+        // Ensure a flat array of image URLs (or objects with an image property)
+        const items = window.inspirationItems || [];
+        return items.filter(Boolean);
     }
-    // Fallback: fetch from configured DATA_BASE_URL if available globally
-    const base = (typeof DATA_BASE_URL !== 'undefined') ? DATA_BASE_URL : '';
-    if(!base) return Promise.resolve([]);
-    return fetch(base + '/inspiration.json', { cache: 'no-cache' })
-      .then(r => r.ok ? r.json() : { items: [] })
-      .then(d => d.items || [])
-      .catch(()=>[]);
-  }
 
-  let items = [];
-  let visibleStart = 0;
-  const VISIBLE = 3;
-  const INTERVAL_MS = 5000; // auto-rotate every 5s
-  let timer = null;
+    function renderSlideshow() {
+        const slidesHost = document.getElementById('inspSlides');
+        const dotsHost = document.getElementById('inspDots');
+        if (!slidesHost || !dotsHost) return;
 
-  // Lightbox state
-  const modal = document.getElementById('lightboxModal');
-  const imgEl = document.getElementById('lightboxImage');
-  const capEl = document.getElementById('lightboxCaption');
-  const btnPrev = modal && modal.querySelector('.lightbox-prev');
-  const btnNext = modal && modal.querySelector('.lightbox-next');
-  const btnClose = modal && modal.querySelector('.lightbox-close');
-  let currentIndex = 0;
+        const items = getItems();
+        // Reset content
+        slidesHost.innerHTML = '';
+        dotsHost.innerHTML = '';
 
-  function renderGrid(){
-    grid.innerHTML = '';
-    const slice = [];
-    for (let i = 0; i < VISIBLE; i++) {
-      slice.push(items[(visibleStart + i) % items.length]);
+        // Do nothing if no items available
+        if (items.length === 0) return;
+        // Ensure current index is within range
+        curSlide = curSlide % items.length;
+        if (curSlide < 0) curSlide = items.length - 1;
+
+        items.forEach((src, index) => {
+            // Create slide container
+            const slide = document.createElement('div');
+            slide.className = 'slide' + (index === curSlide ? ' active' : '');
+            const img = document.createElement('img');
+            img.loading = 'lazy';
+            img.alt = 'Inspiratie';
+            // Support both plain strings and objects with `image` property
+            img.src = typeof src === 'string' ? src : (src.image || '');
+            slide.appendChild(img);
+            slidesHost.appendChild(slide);
+            // Dot indicator
+            const dot = document.createElement('span');
+            dot.className = 'dot' + (index === curSlide ? ' active' : '');
+            dot.addEventListener('click', function() {
+                stopAutoplay();
+                curSlide = index;
+                renderSlideshow();
+                startAutoplay();
+            });
+            dotsHost.appendChild(dot);
+        });
     }
-    slice.forEach((it, idx) => {
-      if(!it) return;
-      const card = document.createElement('div');
-      card.className = 'insp-card';
-      const im = document.createElement('img');
-      im.src = it.image || it.url || '';
-      im.alt = it.title || 'Inspiratie';
-      const ttl = document.createElement('div');
-      ttl.className = 'insp-title';
-      ttl.textContent = it.title || '';
-      card.appendChild(im);
-      if (it.title) card.appendChild(ttl);
-      card.addEventListener('click', () => openLightbox((visibleStart + idx) % items.length));
-      grid.appendChild(card);
+
+    function nextSlide(delta) {
+        const items = getItems();
+        if (items.length === 0) return;
+        curSlide = (curSlide + delta + items.length) % items.length;
+        renderSlideshow();
+    }
+
+    function startAutoplay() {
+        stopAutoplay();
+        const items = getItems();
+        if (items.length > 1) {
+            autoplayTimer = setInterval(function() {
+                nextSlide(1);
+            }, 5000);
+        }
+    }
+
+    function stopAutoplay() {
+        if (autoplayTimer) {
+            clearInterval(autoplayTimer);
+            autoplayTimer = null;
+        }
+    }
+
+    // Expose initialization function globally so index.html can call it
+    window.initializeNewInspiration = function() {
+        // Attach click handlers to navigation buttons
+        const prevBtn = document.getElementById('inspPrev');
+        const nextBtn = document.getElementById('inspNext');
+        if (prevBtn && !prevBtn._slideshowAttached) {
+            prevBtn.addEventListener('click', function() {
+                stopAutoplay();
+                nextSlide(-1);
+                startAutoplay();
+            });
+            prevBtn._slideshowAttached = true;
+        }
+        if (nextBtn && !nextBtn._slideshowAttached) {
+            nextBtn.addEventListener('click', function() {
+                stopAutoplay();
+                nextSlide(1);
+                startAutoplay();
+            });
+            nextBtn._slideshowAttached = true;
+        }
+        renderSlideshow();
+        startAutoplay();
+    };
+
+    // Expose a refresh function for data updates
+    window.refreshNewInspiration = function() {
+        renderSlideshow();
+        // Restart autoplay if needed
+        stopAutoplay();
+        startAutoplay();
+    };
+
+    // Optional keyboard navigation support (left/right arrows)
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowLeft') {
+            stopAutoplay();
+            nextSlide(-1);
+            startAutoplay();
+        } else if (event.key === 'ArrowRight') {
+            stopAutoplay();
+            nextSlide(1);
+            startAutoplay();
+        }
     });
-  }
-
-  function openLightbox(idx){
-    if(!modal) return;
-    currentIndex = idx;
-    updateLightbox();
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeLightbox(){
-    if(!modal) return;
-    modal.classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-  function updateLightbox(){
-    const it = items[currentIndex];
-    if(!it) return;
-    imgEl.src = it.image || it.url || '';
-    imgEl.alt = it.title || 'Inspiratie';
-    capEl.textContent = it.title || '';
-  }
-  function next(n=1){
-    if(!items.length) return;
-    currentIndex = (currentIndex + n + items.length) % items.length;
-    updateLightbox();
-  }
-
-  // Controls
-  if(btnPrev) btnPrev.addEventListener('click', () => next(-1));
-  if(btnNext) btnNext.addEventListener('click', () => next(1));
-  if(btnClose) btnClose.addEventListener('click', closeLightbox);
-  document.addEventListener('keydown', (e)=>{
-    if (modal && !modal.classList.contains('hidden')) {
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowRight') next(1);
-      if (e.key === 'ArrowLeft') next(-1);
-    }
-  });
-  // Touch swipe
-  let touchX = null;
-  document.addEventListener('touchstart', (e)=>{
-    if(!modal || modal.classList.contains('hidden')) return;
-    touchX = e.touches[0].clientX;
-  }, {passive:true});
-  document.addEventListener('touchend', (e)=>{
-    if(!modal || modal.classList.contains('hidden') || touchX===null) return;
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 40) next(dx < 0 ? 1 : -1);
-    touchX = null;
-  }, {passive:true});
-
-  function startAuto(){
-    stopAuto();
-    timer = setInterval(()=>{
-      if(items.length <= VISIBLE) return;
-      visibleStart = (visibleStart + VISIBLE) % items.length;
-      renderGrid();
-    }, INTERVAL_MS);
-  }
-  function stopAuto(){
-    if(timer) clearInterval(timer);
-    timer = null;
-  }
-
-  fetchInspiration().then(list => {
-    items = (list || []).filter(Boolean);
-    if(!items.length) return;
-    renderGrid();
-    startAuto();
-  });
-
-  // Expose an updater for admin live-preview if needed
-  window.__setInspirationItems = function(list){
-    items = (list || []).filter(Boolean);
-    visibleStart = 0;
-    renderGrid();
-  };
 })();
