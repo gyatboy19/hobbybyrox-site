@@ -1,1 +1,5 @@
-{ "heroImage": "branch-version.jpg" }
+{
+  "images": [
+    "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757623231/c3pceebctrub8stlbkla.png"
+  ]
+}
