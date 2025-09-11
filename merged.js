@@ -1,5 +1,7 @@
 // ---------- CONFIGURATION ----------
-const DATA_BASE_URL = 'https://raw.githubusercontent.com/gyatboy19/hobbybyrox-site/main/data';
+// Base URL for data files (products.json, hero.json, inspiration.json).
+// Use a relative path so the site can load from its own domain (/data folder).
+const DATA_BASE_URL = './data';
 const WHATSAPP_NUMBER = '31644999980'; // No + or 00
 const EMAIL_ADDRESS = 'hobbybyrox@gmail.com';
 
@@ -184,15 +186,6 @@ function updateInspirationImages() {
     if ($('inspirationImage1')) $('inspirationImage1').src = items[0] || '';
     if ($('inspirationImage2')) $('inspirationImage2').src = items[1] || '';
     if ($('inspirationImage3')) $('inspirationImage3').src = items[2] || '';
-
-    // If a custom inspiration slideshow has been initialized, refresh it to reflect new items
-    if (typeof window.refreshNewInspiration === 'function') {
-        try {
-            window.refreshNewInspiration();
-        } catch (e) {
-            console.error('Failed to refresh custom inspiration slideshow', e);
-        }
-    }
 }
 
 function updateHeroImages() {
@@ -338,133 +331,3 @@ async function initializePage() {
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);
-
-/*
- * Custom Inspiration Slideshow Integration
- *
- * This module enables a dynamic slideshow for the Inspiration section when
- * using custom markup on the page (e.g. containers with IDs `inspSlides`,
- * `inspDots`, `inspPrev`, and `inspNext`). It will populate the slides
- * from the global `inspirationItems` array (loaded from localStorage) and
- * provide automatic cycling, manual navigation, and dot indicators.
- */
-(function() {
-    let curSlide = 0;
-    let autoplayTimer = null;
-
-    function getItems() {
-        // Ensure a flat array of image URLs (or objects with an image property)
-        const items = window.inspirationItems || [];
-        return items.filter(Boolean);
-    }
-
-    function renderSlideshow() {
-        const slidesHost = document.getElementById('inspSlides');
-        const dotsHost = document.getElementById('inspDots');
-        if (!slidesHost || !dotsHost) return;
-
-        const items = getItems();
-        // Reset content
-        slidesHost.innerHTML = '';
-        dotsHost.innerHTML = '';
-
-        // Do nothing if no items available
-        if (items.length === 0) return;
-        // Ensure current index is within range
-        curSlide = curSlide % items.length;
-        if (curSlide < 0) curSlide = items.length - 1;
-
-        items.forEach((src, index) => {
-            // Create slide container
-            const slide = document.createElement('div');
-            slide.className = 'slide' + (index === curSlide ? ' active' : '');
-            const img = document.createElement('img');
-            img.loading = 'lazy';
-            img.alt = 'Inspiratie';
-            // Support both plain strings and objects with `image` property
-            img.src = typeof src === 'string' ? src : (src.image || '');
-            slide.appendChild(img);
-            slidesHost.appendChild(slide);
-            // Dot indicator
-            const dot = document.createElement('span');
-            dot.className = 'dot' + (index === curSlide ? ' active' : '');
-            dot.addEventListener('click', function() {
-                stopAutoplay();
-                curSlide = index;
-                renderSlideshow();
-                startAutoplay();
-            });
-            dotsHost.appendChild(dot);
-        });
-    }
-
-    function nextSlide(delta) {
-        const items = getItems();
-        if (items.length === 0) return;
-        curSlide = (curSlide + delta + items.length) % items.length;
-        renderSlideshow();
-    }
-
-    function startAutoplay() {
-        stopAutoplay();
-        const items = getItems();
-        if (items.length > 1) {
-            autoplayTimer = setInterval(function() {
-                nextSlide(1);
-            }, 5000);
-        }
-    }
-
-    function stopAutoplay() {
-        if (autoplayTimer) {
-            clearInterval(autoplayTimer);
-            autoplayTimer = null;
-        }
-    }
-
-    // Expose initialization function globally so index.html can call it
-    window.initializeNewInspiration = function() {
-        // Attach click handlers to navigation buttons
-        const prevBtn = document.getElementById('inspPrev');
-        const nextBtn = document.getElementById('inspNext');
-        if (prevBtn && !prevBtn._slideshowAttached) {
-            prevBtn.addEventListener('click', function() {
-                stopAutoplay();
-                nextSlide(-1);
-                startAutoplay();
-            });
-            prevBtn._slideshowAttached = true;
-        }
-        if (nextBtn && !nextBtn._slideshowAttached) {
-            nextBtn.addEventListener('click', function() {
-                stopAutoplay();
-                nextSlide(1);
-                startAutoplay();
-            });
-            nextBtn._slideshowAttached = true;
-        }
-        renderSlideshow();
-        startAutoplay();
-    };
-
-    // Expose a refresh function for data updates
-    window.refreshNewInspiration = function() {
-        renderSlideshow();
-        // Restart autoplay if needed
-        stopAutoplay();
-        startAutoplay();
-    };
-
-    // Optional keyboard navigation support (left/right arrows)
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'ArrowLeft') {
-            stopAutoplay();
-            nextSlide(-1);
-            startAutoplay();
-        } else if (event.key === 'ArrowRight') {
-            stopAutoplay();
-            nextSlide(1);
-            startAutoplay();
-        }
-    });
-})();
