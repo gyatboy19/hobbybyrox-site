@@ -11,9 +11,10 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER;
 const GITHUB_REPO = process.env.GITHUB_REPO;
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
-    console.error("Missing required GitHub environment variables!");
+if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO || !ADMIN_PASSWORD) {
+    console.error("Missing required GitHub or Admin environment variables!");
     process.exit(1);
 }
 
@@ -30,6 +31,23 @@ app.use(cors({
     ]
 }));
 app.use(express.json({ limit: '10mb' })); // Allow larger payloads for potential base64 images
+
+// --- AUTHENTICATION ---
+/**
+ * Middleware to check for a valid admin password in the Authorization header.
+ * The password should be sent as `Authorization: Bearer <password>`.
+ */
+const authenticate = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ ok: false, message: 'Unauthorized: Missing token' });
+    }
+    const token = authHeader.split(' ')[1];
+    if (token !== ADMIN_PASSWORD) {
+        return res.status(401).json({ ok: false, message: 'Unauthorized: Invalid token' });
+    }
+    next();
+};
 
 // --- GITHUB HELPER ---
 /**
@@ -85,7 +103,7 @@ async function upsertFile(path, content) {
  * @param {string[]} req.body.inspirationItems - An array of inspiration image URLs.
  * @param {object} res - The Express response object.
  */
-app.post('/api/save-products', async (req, res) => {
+app.post('/api/save-products', authenticate, async (req, res) => {
     try {
         const { products, heroSlides, inspirationItems } = req.body;
 
