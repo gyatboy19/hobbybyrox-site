@@ -25,7 +25,7 @@ async function handleLogin() {
         const response = await fetch(`${SYNC_BASE}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: ADMIN_USERNAME_DEFAULT, password: password }),
+            body: JSON.stringify({ username: loginIn, password: password }),
         });
 
         const result = await response.json();
