@@ -51,53 +51,11 @@ function attachStatusBadge(inputEl) {
 }
 
 // ======================= AUTHENTICATION =======================
-async function handleLogin() {
-    const username = $('username').value;
-    const password = $('password').value;
-    const loginError = $('loginError');
-    const loginBtn = $('loginBtn');
-
-    loginBtn.disabled = true;
-    loginBtn.textContent = 'Logging in...';
-    loginError.textContent = '';
-
-    try {
-        const response = await fetch(`${SYNC_BASE}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.ok) {
-            sessionStorage.setItem('admin_token', result.token);
-            $('loginOverlay').style.display = 'none';
-        } else {
-            loginError.textContent = result.message || 'Login failed.';
-        }
-    } catch (error) {
-        loginError.textContent = 'An error occurred during login.';
-        console.error('Login error:', error);
-    } finally {
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Login';
-    }
-}
-
 function checkAuth() {
     const token = sessionStorage.getItem('admin_token');
-    const overlay = $('loginOverlay');
-    if (token) {
-        overlay.style.display = 'none';
-    } else {
-        overlay.style.display = 'flex';
-        $('loginBtn').addEventListener('click', handleLogin);
-        $('password').addEventListener('keyup', (event) => {
-            if (event.key === 'Enter') {
-                handleLogin();
-            }
-        });
+    // If no token exists, redirect to the login page.
+    if (!token) {
+        window.location.href = 'login.html';
     }
 }
 
