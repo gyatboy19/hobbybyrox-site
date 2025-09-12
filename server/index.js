@@ -12,10 +12,20 @@ const GITHUB_OWNER = process.env.GITHUB_OWNER;
 const GITHUB_REPO = process.env.GITHUB_REPO;
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO || !ADMIN_USERNAME || !ADMIN_PASSWORD) {
-    console.error("Missing required GitHub or Admin environment variables! Ensure ADMIN_USERNAME and ADMIN_PASSWORD are set.");
+// --- SECURITY WARNING ---
+// The admin password is hardcoded and obfuscated below.
+// This is NOT a recommended security practice. Hardcoding credentials can
+// expose them to anyone with access to the source code.
+// This was implemented based on a specific user request to avoid
+// environment variable issues.
+// For better security, use environment variables or a secret management service.
+const OBFUSCATED_PASSWORD = 'QURNSU5fUk9Y'; // "ADMIN_ROX" in Base64
+const ADMIN_PASSWORD = Buffer.from(OBFUSCATED_PASSWORD, 'base64').toString('utf8');
+
+
+if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO || !ADMIN_USERNAME) {
+    console.error("Missing required GitHub or Admin environment variables! Ensure ADMIN_USERNAME is set.");
     process.exit(1);
 }
 
