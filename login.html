@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="merged.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--surface);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            padding: 32px;
+        }
+        .login-card h1 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .login-card .btn {
+            width: 100%;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card login-card">
+        <h1>🛠️ Admin Login</h1>
+        <form id="loginForm">
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+            <button type="submit" class="btn primary">Login</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const password = document.getElementById('password').value;
+            if (password) {
+                sessionStorage.setItem('admin_password', password);
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
+</body>
+</html>

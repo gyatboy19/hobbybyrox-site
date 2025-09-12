@@ -147,11 +147,28 @@ async function syncToRepo() {
     };
 
     try {
+        const password = sessionStorage.getItem('admin_password');
+        if (!password) {
+            toast('Password not found. Please log in again.', true);
+            window.location.href = 'login.html';
+            return;
+        }
+
         const response = await fetch(`${SYNC_BASE}/api/save-products`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${password}`
+            },
             body: JSON.stringify(payload),
         });
+
+        if (response.status === 401) {
+            toast('Authentication failed. Please log in again.', true);
+            sessionStorage.removeItem('admin_password');
+            window.location.href = 'login.html';
+            return;
+        }
         if (!response.ok) throw new Error('Server returned an error');
         const result = await response.json();
         toast(`Sync successful! Commit: ${result.commit.slice(0, 7)}`);
@@ -519,6 +536,15 @@ function initializeApp() {
     // Attach inspiration add handler if present
     const addBtn = document.getElementById('inspAddBtn');
     if (addBtn) addBtn.addEventListener('click', addInspiration);
+    // Attach logout handler
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.removeItem('admin_password');
+            window.location.href = 'login.html';
+        });
+    }
 }
 
 /**

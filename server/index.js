@@ -85,7 +85,7 @@ async function upsertFile(path, content) {
  * @param {string[]} req.body.inspirationItems - An array of inspiration image URLs.
  * @param {object} res - The Express response object.
  */
-app.post('/api/save-products', async (req, res) => {
+app.post('/api/save-products', authenticate, async (req, res) => {
     try {
         const { products, heroSlides, inspirationItems } = req.body;
 

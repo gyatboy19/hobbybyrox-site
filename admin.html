@@ -4,6 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Beheer – HobbyByRox</title>
+  <script>
+    if (!sessionStorage.getItem('admin_password')) {
+        window.location.href = 'login.html';
+    }
+  </script>
   <link rel="stylesheet" href="merged.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🛠️</text></svg>">
   <style>
@@ -32,7 +37,7 @@
   <header>
     <div class="container nav">
       <div style="font-weight:800">🛠️ Beheer HobbyByRox</div>
-      <div><a class="btn" href="index.html">← Terug naar site</a></div>
+      <div><a class="btn" href="login.html" id="logoutBtn">Logout</a></div>
     </div>
   </header>
 
