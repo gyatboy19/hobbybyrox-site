@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login – HobbyByRox Beheer</title>
+  <link rel="stylesheet" href="merged.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🛠️</text></svg>">
+  <style>
+    body, html {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--surface);
+    }
+    .login-container {
+      background: var(--surface-2);
+      padding: 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    .login-container h2 {
+      margin-top: 0;
+      color: var(--text-headings);
+    }
+    .login-container p {
+      margin-bottom: 24px;
+      color: var(--muted);
+    }
+    .login-container input {
+      margin-bottom: 24px;
+      width: 100%;
+    }
+    .login-container .btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+    }
+    .login-container #loginError {
+      color: var(--danger);
+      margin-top: 15px;
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Admin Login</h2>
+    <p>Voer uw wachtwoord in om door te gaan</p>
+    <div style="text-align:left;">
+      <label for="password">Wachtwoord</label>
+      <input type="password" id="password" placeholder="Password">
+    </div>
+    <button id="loginBtn" class="btn primary">Login</button>
+    <p id="loginError"></p>
+  </div>
+  <script src="login.js"></script>
+</body>
+</html>

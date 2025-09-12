@@ -24,21 +24,6 @@
   </style>
 </head>
 <body>
-  <div id="loginOverlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(255,255,255,0.95); z-index: 9999; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(8px);">
-    <div style="background:var(--surface); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
-      <h2 style="margin-top:0; color: var(--text-headings);">Admin Login</h2>
-      <p style="margin-bottom:24px; color: var(--muted);">Voer uw gegevens in om door te gaan</p>
-      <div style="text-align:left;">
-        <label for="username">Gebruikersnaam</label>
-        <input type="text" id="username" placeholder="Username" style="margin-bottom: 16px; width: 300px;">
-        <label for="password">Wachtwoord</label>
-        <input type="password" id="password" placeholder="Password" style="margin-bottom: 24px; width: 300px;">
-      </div>
-      <button id="loginBtn" class="btn primary" style="width:100%; padding: 12px; font-size: 16px;">Login</button>
-      <p id="loginError" style="color: var(--danger); margin-top: 15px; min-height: 1.2em;"></p>
-    </div>
-  </div>
-
   <div class="notification" id="toast"></div>
   <div class="sync-bar">
     <button class="btn primary" id="syncBtn">💾 Sync to Repo</button>
