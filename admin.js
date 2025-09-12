@@ -50,6 +50,57 @@ function attachStatusBadge(inputEl) {
     return badge;
 }
 
+// ======================= AUTHENTICATION =======================
+async function handleLogin() {
+    const username = $('username').value;
+    const password = $('password').value;
+    const loginError = $('loginError');
+    const loginBtn = $('loginBtn');
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Logging in...';
+    loginError.textContent = '';
+
+    try {
+        const response = await fetch(`${SYNC_BASE}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.ok) {
+            sessionStorage.setItem('admin_token', result.token);
+            $('loginOverlay').style.display = 'none';
+        } else {
+            loginError.textContent = result.message || 'Login failed.';
+        }
+    } catch (error) {
+        loginError.textContent = 'An error occurred during login.';
+        console.error('Login error:', error);
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+    }
+}
+
+function checkAuth() {
+    const token = sessionStorage.getItem('admin_token');
+    const overlay = $('loginOverlay');
+    if (token) {
+        overlay.style.display = 'none';
+    } else {
+        overlay.style.display = 'flex';
+        $('loginBtn').addEventListener('click', handleLogin);
+        $('password').addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    }
+}
+
 // ======================= STATE MANAGEMENT =====================
 /**
  * The main state object for the admin panel.
@@ -132,6 +183,15 @@ async function syncToRepo() {
     syncBtn.disabled = true;
     syncBtn.textContent = 'Syncing...';
 
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) {
+        toast('Authentication error. Please log in again.', true);
+        checkAuth(); // Show login screen
+        syncBtn.disabled = false;
+        syncBtn.textContent = '💾 Sync to Repo';
+        return;
+    }
+
     // Filter out any local base64 previews before syncing
     Object.values(state.products).forEach(p => {
         p.images = (p.images || []).filter(url => url.startsWith('https://'));
@@ -149,9 +209,20 @@ async function syncToRepo() {
     try {
         const response = await fetch(`${SYNC_BASE}/api/save-products`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(payload),
         });
+
+        if (response.status === 401) {
+            sessionStorage.removeItem('admin_token');
+            toast('Session expired. Please log in again.', true);
+            checkAuth();
+            return;
+        }
+
         if (!response.ok) throw new Error('Server returned an error');
         const result = await response.json();
         toast(`Sync successful! Commit: ${result.commit.slice(0, 7)}`);
@@ -525,4 +596,7 @@ function initializeApp() {
  * Main entry point for the admin panel.
  * Waits for the DOM to be fully loaded before initializing the application.
  */
-document.addEventListener('DOMContentLoaded', initializeApp);
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    initializeApp();
+});
