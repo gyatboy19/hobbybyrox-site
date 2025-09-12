@@ -405,7 +405,7 @@ $('addProductBtn').addEventListener('click', async () => {
 let editingId = null;
 /**
  * Opens the edit modal for a specific product.
- * It populates the modal's input fields with the data from the selected product.
+ * It populates the's input fields with the data from the selected product.
  * @param {string} id The ID of the product to edit.
  */
 function openEditModal(id) {

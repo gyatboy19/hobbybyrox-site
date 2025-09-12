@@ -26,6 +26,18 @@
             width: 100%;
             margin-top: 16px;
         }
+        .forgot-password {
+            text-align: center;
+            margin-top: 16px;
+        }
+        .forgot-password a {
+            color: var(--text-muted);
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -36,6 +48,9 @@
             <input type="password" id="password" required>
             <button type="submit" class="btn primary">Login</button>
         </form>
+        <div class="forgot-password">
+            <a href="mailto:support@hobbybyrox.nl">Wachtwoord vergeten?</a>
+        </div>
     </div>
 
     <script>
