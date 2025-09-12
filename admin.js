@@ -5,7 +5,18 @@ const UPLOAD_PRESET = "hobbyrox_unsigned";
 const SYNC_BASE = "https://hobbybyrox-site.onrender.com";
 
 // ======================= HELPERS ============================
+/**
+ * A simple shorthand for `document.getElementById`.
+ * @param {string} id The ID of the element to get.
+ * @returns {HTMLElement} The element with the specified ID.
+ */
 function $(id) { return document.getElementById(id); }
+
+/**
+ * Displays a toast message at the bottom of the screen.
+ * @param {string} msg The message to display.
+ * @param {boolean} [isError=false] If true, the toast will have a red error style.
+ */
 function toast(msg, isError = false) {
     const t = $('toast');
     if (!t) return;
@@ -14,8 +25,20 @@ function toast(msg, isError = false) {
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+/**
+ * Formats a number as a currency string with two decimal places.
+ * @param {number|string} v The value to format.
+ * @returns {string} The formatted currency string.
+ */
 function currency(v) { return (Number(v) || 0).toFixed(2); }
 
+/**
+ * Attaches a status badge element after an input field.
+ * This is used to show upload progress or status.
+ * @param {HTMLInputElement} inputEl The input element to attach the badge to.
+ * @returns {HTMLDivElement} The created or existing badge element.
+ */
 function attachStatusBadge(inputEl) {
     let badge = inputEl.parentElement.querySelector('.status-badge');
     if (!badge) {
@@ -28,18 +51,30 @@ function attachStatusBadge(inputEl) {
 }
 
 // ======================= STATE MANAGEMENT =====================
+/**
+ * The main state object for the admin panel.
+ * It holds all the data that can be edited and synced.
+ * @type {{products: object, heroSlides: string[], inspirationItems: string[]}}
+ */
 let state = {
     products: {},
     heroSlides: [],
     inspirationItems: [],
 };
 
+/**
+ * Loads the application state from localStorage.
+ * If no state is found in localStorage, it initializes with empty values.
+ */
 function loadState() {
     state.products = JSON.parse(localStorage.getItem('admin_products')) || {};
     state.heroSlides = JSON.parse(localStorage.getItem('admin_heroSlides')) || [];
     state.inspirationItems = JSON.parse(localStorage.getItem('admin_inspirationItems')) || [];
 }
 
+/**
+ * Saves the current application state to localStorage.
+ */
 function saveState() {
     localStorage.setItem('admin_products', JSON.stringify(state.products));
     localStorage.setItem('admin_heroSlides', JSON.stringify(state.heroSlides));
@@ -47,11 +82,16 @@ function saveState() {
 }
 
 // ======================= CLOUDINARY UPLOAD =======================
+/**
+ * Uploads a file to Cloudinary using a specified unsigned preset.
+ * @param {File} file The file to upload.
+ * @returns {Promise<string|null>} A promise that resolves with the secure URL of the uploaded image, or null if the upload fails.
+ */
 async function uploadToCloudinary(file) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', UPLOAD_PRESET);
-    
+
     try {
         const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
             method: 'POST',
@@ -66,6 +106,12 @@ async function uploadToCloudinary(file) {
     }
 }
 
+/**
+ * Creates a local base64 preview for a file.
+ * This is used to display an image preview immediately after selection, before it has been uploaded.
+ * @param {File} file The file to preview.
+ * @returns {Promise<string|null>} A promise that resolves with the base64 data URL of the file, or null on error.
+ */
 function getLocalPreview(file) {
     return new Promise(resolve => {
         const reader = new FileReader();
@@ -76,11 +122,16 @@ function getLocalPreview(file) {
 }
 
 // ======================= SYNC TO REPO =======================
+/**
+ * Syncs the current local state to the GitHub repository.
+ * It filters out any local base64 image previews and sends the clean data
+ * to the backend server, which then updates the JSON files in the repo.
+ */
 async function syncToRepo() {
     const syncBtn = $('syncBtn');
     syncBtn.disabled = true;
     syncBtn.textContent = 'Syncing...';
-    
+
     // Filter out any local base64 previews before syncing
     Object.values(state.products).forEach(p => {
         p.images = (p.images || []).filter(url => url.startsWith('https://'));
@@ -116,6 +167,10 @@ async function syncToRepo() {
 // ======================= UI RENDERING & LOGIC =======================
 
 // --- Hero Slides ---
+/**
+ * Renders the list of hero slides in the admin panel.
+ * Each slide has a preview image and a button to remove it.
+ */
 function renderHeroSlides() {
     const list = $('heroSlidesList');
     list.innerHTML = '';
@@ -135,6 +190,12 @@ function renderHeroSlides() {
         });
     });
 }
+
+/**
+ * Handles adding a new hero image.
+ * It can be added from a URL or a file upload.
+ * File uploads are sent to Cloudinary.
+ */
 $('heroAddBtn').addEventListener('click', async () => {
     const urlInput = $('heroNewUrl');
     const fileInput = $('heroNewImage');
@@ -251,6 +312,10 @@ async function addInspiration() {
 
 
 // --- Products ---
+/**
+ * Renders the list of products in the admin panel.
+ * Each product has its name, price, an edit button, and a delete button.
+ */
 function renderProducts() {
     const list = $('productList');
     list.innerHTML = '';
@@ -279,6 +344,11 @@ function renderProducts() {
     }));
 }
 
+/**
+ * Handles adding a new product.
+ * It gathers all the data from the new product form, uploads images to Cloudinary,
+ * and adds the new product to the state.
+ */
 $('addProductBtn').addEventListener('click', async () => {
     const p = {
         name: $('npName').value.trim(),
@@ -292,7 +362,7 @@ $('addProductBtn').addEventListener('click', async () => {
         toast('Name and Price are required.', true);
         return;
     }
-    
+
     // Process images
     const urls = [$('npUrl1').value.trim(), $('npUrl2').value.trim()];
     const files = [$('npImg1').files[0], $('npImg2').files[0]];
@@ -305,7 +375,7 @@ $('addProductBtn').addEventListener('click', async () => {
         }
     }
     p.thumbnail = p.images[0] || '';
-    
+
     const id = Date.now().toString();
     state.products[id] = p;
     saveState();
@@ -316,6 +386,11 @@ $('addProductBtn').addEventListener('click', async () => {
 
 // Edit Modal
 let editingId = null;
+/**
+ * Opens the edit modal for a specific product.
+ * It populates the modal's input fields with the data from the selected product.
+ * @param {string} id The ID of the product to edit.
+ */
 function openEditModal(id) {
     editingId = id;
     const p = state.products[id];
@@ -329,6 +404,12 @@ function openEditModal(id) {
     $('epUrl2').value = (p.images && p.images[1]) || '';
     $('editProductModal').style.display = 'block';
 }
+
+/**
+ * Handles saving the changes to an edited product.
+ * It gathers the updated data from the edit modal, uploads any new images,
+ * and updates the product in the state.
+ */
 $('epSaveBtn').addEventListener('click', async () => {
     if (!editingId) return;
     const p = state.products[editingId];
@@ -337,7 +418,7 @@ $('epSaveBtn').addEventListener('click', async () => {
     p.price = parseFloat($('epPrice').value) || 0;
     p.category = $('epCat').value;
     p.extra = $('epExtra').value.trim();
-    
+
     const urls = [$('epUrl1').value.trim(), $('epUrl2').value.trim()];
     const files = [$('epImg1').files[0], $('epImg2').files[0]];
     const newImages = [];
@@ -359,6 +440,10 @@ $('epSaveBtn').addEventListener('click', async () => {
     renderProducts();
     $('editProductModal').style.display = 'none';
 });
+
+/**
+ * Handles deleting a product from the edit modal.
+ */
 $('epDeleteBtn').addEventListener('click', () => {
     if (editingId && confirm('Delete this product?')) {
         delete state.products[editingId];
@@ -367,10 +452,17 @@ $('epDeleteBtn').addEventListener('click', () => {
         $('editProductModal').style.display = 'none';
     }
 });
+
+/**
+ * Handles closing the edit modal.
+ */
 $('editClose').addEventListener('click', () => $('editProductModal').style.display = 'none');
 
 
 // --- Import/Export ---
+/**
+ * Handles exporting the current state to a JSON file.
+ */
 $('exportBtn').addEventListener('click', () => {
     const dataStr = JSON.stringify(state, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
@@ -381,6 +473,10 @@ $('exportBtn').addEventListener('click', () => {
     a.click();
     URL.revokeObjectURL(url);
 });
+
+/**
+ * Handles importing state from a JSON file.
+ */
 $('importBtn').addEventListener('click', () => {
     const file = $('importFile').files[0];
     if (!file) { toast('Please select a file.', true); return; }
@@ -407,6 +503,10 @@ $('importBtn').addEventListener('click', () => {
 
 
 // ======================= INITIALIZATION =======================
+/**
+ * Initializes the admin panel application.
+ * This function loads the state from localStorage and renders all the UI components.
+ */
 function initializeApp() {
     loadState();
     renderHeroSlides();
@@ -421,4 +521,8 @@ function initializeApp() {
     if (addBtn) addBtn.addEventListener('click', addInspiration);
 }
 
+/**
+ * Main entry point for the admin panel.
+ * Waits for the DOM to be fully loaded before initializing the application.
+ */
 document.addEventListener('DOMContentLoaded', initializeApp);

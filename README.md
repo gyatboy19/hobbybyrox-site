@@ -1,8 +1,90 @@
-# HobbyByRox Website Setup Guide
+# HobbyByRox Website
+
+This repository contains the source code for the HobbyByRox website, a simple e-commerce site with a custom admin panel for managing content. The site is built with vanilla HTML, CSS, and JavaScript, and it uses a Node.js server to sync data to the GitHub repository itself, effectively using Git as a database.
+
+## Architecture Overview
+
+The project is divided into three main parts:
+
+1.  **Frontend**: The public-facing website (`index.html`, `site.js`) and the admin panel (`admin.html`, `admin.js`).
+2.  **Backend**: A simple Node.js/Express server (`server/index.js`) responsible for syncing data from the admin panel to the GitHub repository.
+3.  **Data**: JSON files (`data/*.json`) that store the website's content, such as products, hero images, and inspiration items.
+
+This unique architecture allows for a simple, serverless-like deployment for the frontend (using GitHub Pages) while still providing a way to manage content dynamically.
+
+## File Structure
+
+Here is a breakdown of the most important files in this repository:
+
+| File                  | Description                                                                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.html`          | The main landing page of the website.                                                                                                    |
+| `site.js`             | Handles fetching data and rendering the content for `index.html`.                                                                        |
+| `admin.html`          | The admin panel for managing site content.                                                                                               |
+| `admin.js`            | Contains all the logic for the admin panel, including state management, image uploads to Cloudinary, and syncing data to the repository. |
+| `data/`               | A directory containing the JSON files that act as the database for the site.                                                             |
+| `data/products.json`  | Stores all product information.                                                                                                          |
+| `data/hero.json`      | Stores the URLs for the hero images on the main page.                                                                                    |
+| `data/inspiration.json`| Stores the URLs for the inspiration gallery.                                                                                           |
+| `server/`             | Contains the Node.js backend server.                                                                                                     |
+| `server/index.js`     | The Express server that listens for sync requests from the admin panel and updates the JSON files in the `data/` directory.              |
+
+## Local Development
+
+To run the project locally, you will need to run the frontend and backend separately.
+
+### Frontend
+
+The easiest way to run the frontend is with a simple HTTP server. If you have Python installed, you can run the following command from the root of the repository:
+
+```bash
+python -m http.server
+```
+
+This will serve the files on `http://localhost:8000`. You can then access the main site at `http://localhost:8000` and the admin panel at `http://localhost:8000/admin.html`.
+
+For a better development experience, you can use an extension like [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) for Visual Studio Code.
+
+### Backend
+
+The backend server requires Node.js and npm.
+
+1.  **Navigate to the server directory:**
+    ```bash
+    cd server
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Set up environment variables:**
+    Create a `.env` file in the `server/` directory and add the following variables:
+    ```
+    GITHUB_TOKEN=your_github_personal_access_token
+    GITHUB_OWNER=your_github_username
+    GITHUB_REPO=your_github_repository_name
+    ```
+
+4.  **Start the server:**
+    ```bash
+    npm start
+    ```
+
+The server will start on port 10000 by default.
+
+## Deployment
+
+The original deployment instructions can be found below. This setup uses GitHub Pages for the frontend and Render for the backend server.
+
+---
+
+### HobbyByRox Website Setup Guide
 
 This guide walks you through setting up the HobbyByRox website, admin panel, and data synchronization server.
 
-## 🚀 Step 1: GitHub Repository Setup
+#### 🚀 Step 1: GitHub Repository Setup
 
 1.  **Create a new public GitHub repository** named `hobbybyrox-site`.
 2.  **Add all the generated files** to your local repository folder:
@@ -25,7 +107,7 @@ This guide walks you through setting up the HobbyByRox website, admin panel, and
     git push -u origin main
     ```
 
-## 🌐 Step 2: Configure GitHub Pages & Domain
+#### 🌐 Step 2: Configure GitHub Pages & Domain
 
 1.  **Enable GitHub Pages**:
     -   In your `hobbybyrox-site` repository, go to **Settings > Pages**.
@@ -60,7 +142,7 @@ This guide walks you through setting up the HobbyByRox website, admin panel, and
     -   It may take some time for the DNS changes to propagate and for GitHub to issue an SSL certificate.
     -   Once it's ready, a green checkmark will appear. Check the box for **Enforce HTTPS**.
 
-## ☁️ Step 3: Cloudinary Setup for Image Uploads
+#### ☁️ Step 3: Cloudinary Setup for Image Uploads
 
 1.  **Create a Cloudinary Account**: Sign up for a free account at [cloudinary.com](https://cloudinary.com).
 2.  **Find your Cloud Name**: On your Cloudinary dashboard, your **Cloud Name** is displayed prominently. Copy this value.
@@ -73,7 +155,7 @@ This guide walks you through setting up the HobbyByRox website, admin panel, and
     -   Click **Save** at the bottom.
     -   Copy the **Preset name** (e.g., `ml_default` or whatever you named it). This is your `UPLOAD_PRESET`.
 
-## ⚙️ Step 4: Deploy the Sync Server on Render
+#### ⚙️ Step 4: Deploy the Sync Server on Render
 
 1.  **Create a GitHub Personal Access Token (Classic)**:
     -   Go to your GitHub **Settings > Developer settings > Personal access tokens > Tokens (classic)**.
@@ -96,7 +178,7 @@ This guide walks you through setting up the HobbyByRox website, admin panel, and
         -   `PORT`: `10000`
     -   Click **Create Web Service**. After the deployment finishes, copy your service's public URL (e.g., `https://hobbybyrox-sync.onrender.com`).
 
-## ✅ Step 5: Final Configuration
+#### ✅ Step 5: Final Configuration
 
 1.  **Update `admin.js`**:
     -   Open the `admin.js` file.
@@ -108,21 +190,3 @@ This guide walks you through setting up the HobbyByRox website, admin panel, and
         ```
 2.  **Commit and push** your updated `admin.js` file.
 3.  Your site is now live! Open `https://hobbybyrox.nl/admin.html` to start managing content.
-
-## 🧪 Test Plan
-
-1.  **Update an Inspiration Image**:
-    -   Go to `admin.html`.
-    -   Upload a new image to one of the inspiration slots.
-    -   Click **Sync to Repo**.
-    -   Check your GitHub repo; the `data/inspiration.json` file should be updated with a new commit.
-    -   Open `hobbybyrox.nl` in an incognito window to see the change.
-2.  **Add a Product from a Phone**:
-    -   Open `admin.html` on your phone.
-    -   Fill out the "New Product" form and use the "Upload" button to select two photos from your camera roll.
-    -   Click **Add**, then **Sync to Repo**.
-    -   Verify the product appears on the public site with Cloudinary URLs for the images.
-3.  **Offline Test**:
-    -   Turn off Wi-Fi/data on your device.
-    -   In `admin.html`, try to upload an image. A local preview (base64) should appear, and a warning toast should inform you the upload failed.
-    -   Click **Sync to Repo**. The sync payload should not contain the `data:image/...` string. The server will only commit valid Cloudinary URLs.
