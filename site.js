@@ -1,3 +1,8 @@
+/**
+ * Main entry point for the public-facing site.
+ * Waits for the DOM to be fully loaded, then fetches all necessary
+ * data and renders the initial view of the page.
+ */
 document.addEventListener('DOMContentLoaded', () => {
   const productGrid = document.getElementById('productGrid');
   const heroCard = document.querySelector('.hero-card');
@@ -28,7 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (productGrid) productGrid.innerHTML = '<p>Error loading products. Please try again later.</p>';
   });
 
-  // Render products in the grid
+  /**
+   * Renders a list of products into the product grid.
+   * Clears the existing grid and populates it with new product cards.
+   *
+   * @param {object[]} productsToRender - An array of product objects to display.
+   * @param {string} productsToRender[].id - The unique ID of the product.
+   * @param {string} productsToRender[].name - The name of the product.
+   * @param {number} productsToRender[].price - The price of the product.
+   * @param {string[]} productsToRender[].images - An array of image URLs for the product.
+   * @param {string} [productsToRender[].thumbnail] - The URL for the product's thumbnail image.
+   */
   function renderProducts(productsToRender) {
     if (!productGrid) return;
     productGrid.innerHTML = '';
@@ -53,7 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Handle category filtering
+  /**
+   * Handles category filtering.
+   * Adds click event listeners to the category filter chips.
+   */
   filters.forEach(filter => {
     filter.addEventListener('click', () => {
       filters.forEach(f => f.classList.remove('active'));
@@ -68,7 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Render hero image
+  /**
+   * Renders the hero image.
+   * Takes the first image from the hero data and displays it in the hero card.
+   *
+   * @param {object} heroData - The hero data object.
+   * @param {string[]} heroData.images - An array of image URLs for the hero section.
+   */
   function renderHero(heroData) {
     if (!heroCard || !heroData.images || heroData.images.length === 0) return;
     const heroImg = document.createElement('img');
@@ -77,7 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
     heroCard.appendChild(heroImg);
   }
 
-  // Render inspiration slideshow
+  /**
+   * Renders the inspiration slideshow.
+   * Creates slides and navigation dots for each inspiration item.
+   * Also sets up event listeners for the previous/next buttons and dots.
+   *
+   * @param {object} inspirationData - The inspiration data object.
+   * @param {string[]} inspirationData.items - An array of image URLs for the inspiration slideshow.
+   */
   function renderInspiration(inspirationData) {
     if (!inspSlides || !inspirationData.items || inspirationData.items.length === 0) return;
 
@@ -99,6 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const slides = inspSlides.querySelectorAll('.slide');
     const dots = inspDots.querySelectorAll('.dot');
 
+    /**
+     * Shows a specific slide in the slideshow.
+     * @param {number} index - The index of the slide to show.
+     */
     function showSlide(index) {
       slides.forEach(s => s.classList.remove('active'));
       dots.forEach(d => d.classList.remove('active'));

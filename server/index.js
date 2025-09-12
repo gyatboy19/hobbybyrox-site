@@ -20,18 +20,37 @@ if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 // --- MIDDLEWARE ---
+const allowedOrigins = [
+    `https://${GITHUB_OWNER}.github.io`,
+    'http://localhost:8000', // For local testing
+    'http://127.0.0.1:5500', // For Live Server
+    'https://hobbybyrox.nl',
+    'https://www.hobbybyrox.nl'
+];
+
 app.use(cors({
-    origin: [
-        `https://${GITHUB_OWNER}.github.io`,
-        'http://localhost:8000', // For local testing
-        'http://127.0.0.1:5500', // For Live Server
-        'https://hobbybyrox.nl',
-        'https://www.hobbybyrox.nl'
-    ]
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    }
 }));
 app.use(express.json({ limit: '10mb' })); // Allow larger payloads for potential base64 images
 
 // --- GITHUB HELPER ---
+/**
+ * Creates a new file or updates an existing file in the GitHub repository.
+ * It first tries to get the SHA of an existing file. If the file doesn't exist,
+ * it creates it. If it does exist, it updates it using the retrieved SHA.
+ *
+ * @param {string} path - The full path to the file in the repository (e.g., 'data/products.json').
+ * @param {string} content - The string content to be stored in the file.
+ * @returns {Promise<string>} A promise that resolves with the SHA of the commit.
+ */
 async function upsertFile(path, content) {
     let sha;
     try {
@@ -62,6 +81,20 @@ async function upsertFile(path, content) {
 
 
 // --- API ENDPOINT ---
+/**
+ * Handles the API request to save all site data.
+ * It receives product, hero, and inspiration data in the request body,
+ * stringifies them, and uses the `upsertFile` helper to save each
+ * data type to its corresponding JSON file in the `data/` directory
+ * of the GitHub repository.
+ *
+ * @param {object} req - The Express request object.
+ * @param {object} req.body - The parsed JSON body of the request.
+ * @param {object} req.body.products - A map of product objects.
+ * @param {string[]} req.body.heroSlides - An array of hero image URLs.
+ * @param {string[]} req.body.inspirationItems - An array of inspiration image URLs.
+ * @param {object} res - The Express response object.
+ */
 app.post('/api/save-products', async (req, res) => {
     try {
         const { products, heroSlides, inspirationItems } = req.body;
