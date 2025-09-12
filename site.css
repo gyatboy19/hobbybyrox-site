@@ -104,7 +104,7 @@ html,body{background:var(--bg)!important}
 .slideshow-container {
   position: relative;
   width: 100%;
-  height: 500px;
+  aspect-ratio: 16 / 9;
 }
 
 .slide {
@@ -179,7 +179,7 @@ html,body{background:var(--bg)!important}
 
 @media (max-width: 768px) {
   .slideshow-container {
-    height: 400px;
+    aspect-ratio: 3 / 4;
   }
   .slideshow-nav {
     width: 40px;
@@ -199,11 +199,6 @@ html,body{background:var(--bg)!important}
   }
 }
 
-@media (max-width: 480px) {
-  .slideshow-container {
-    height: 300px;
-  }
-}
 
 /* ================== MOBILE STYLES (Final Version) ================== */
 @media (max-width: 980px) {
