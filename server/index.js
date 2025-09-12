@@ -11,10 +11,11 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER;
 const GITHUB_REPO = process.env.GITHUB_REPO;
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO || !ADMIN_PASSWORD) {
-    console.error("Missing required GitHub or Admin environment variables!");
+if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO || !ADMIN_USERNAME || !ADMIN_PASSWORD) {
+    console.error("Missing required GitHub or Admin environment variables! Ensure ADMIN_USERNAME and ADMIN_PASSWORD are set.");
     process.exit(1);
 }
 
@@ -83,12 +84,27 @@ async function upsertFile(path, content) {
         branch: GITHUB_BRANCH,
         sha, // If sha is undefined, it's a new file
     });
-    
+
     return commit.sha;
 }
 
 
 // --- API ENDPOINT ---
+
+/**
+ * Handles login requests.
+ * Checks credentials against environment variables.
+ * On success, returns a token (the admin password).
+ */
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        res.json({ ok: true, token: ADMIN_PASSWORD });
+    } else {
+        res.status(401).json({ ok: false, message: 'Invalid credentials' });
+    }
+});
+
 /**
  * Handles the API request to save all site data.
  * It receives product, hero, and inspiration data in the request body,
@@ -123,7 +139,7 @@ app.post('/api/save-products', authenticate, async (req, res) => {
         const commitSha = await upsertFile('data/products.json', productsContent);
         await upsertFile('data/hero.json', heroContent);
         await upsertFile('data/inspiration.json', inspirationContent);
-        
+
         res.status(200).json({ ok: true, commit: commitSha });
 
     } catch (error) {
