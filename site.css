@@ -192,6 +192,11 @@ html,body{background:var(--bg)!important}
   .slideshow-nav.next {
     right: 10px;
   }
+
+  .hero-card {
+    aspect-ratio: 3/4;
+    max-height: 60vh;
+  }
 }
 
 @media (max-width: 480px) {
