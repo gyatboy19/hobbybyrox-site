@@ -22,7 +22,7 @@ if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO || !ADMIN_USERNAME || !ADMIN_
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 // --- MIDDLEWARE ---
-app.use(cors({
+const corsOptions = {
     origin: [
         `https://${GITHUB_OWNER}.github.io`,
         'http://localhost:8000', // For local testing
@@ -30,7 +30,9 @@ app.use(cors({
         'https://hobbybyrox.nl',
         'https://www.hobbybyrox.nl'
     ]
-}));
+};
+app.options('*', cors(corsOptions)); // Enable pre-flight for all routes
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' })); // Allow larger payloads for potential base64 images
 
 // --- AUTHENTICATION ---
