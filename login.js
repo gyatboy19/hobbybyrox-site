@@ -3,43 +3,19 @@ function $(id) {
   return document.getElementById(id);
 }
 
-// --- Obfuscation ---
-// This section contains the obfuscated password and the logic to reveal it.
-// The actual password is "RoxLovesHobby".
-
-// To change the password:
-// 1. Open the developer console in your browser (usually F12).
-// 2. Paste the following function and press Enter:
-/*
-function transformPassword(password) {
-  let transformed = '';
-  for (let i = 0; i < password.length; i++) {
-    transformed += String.fromCharCode(password.charCodeAt(i) + (i % 2 === 0 ? 1 : -1));
-  }
-  return transformed;
-}
-*/
-// 3. Run `transformPassword("YourNewPassword")` in the console.
-// 4. Copy the resulting string and replace the value of OBFUSCATED_PASS below.
-
-const OBFUSCATED_PASS = "SnyKpufrIncaz"; // This is "RoxLovesHobby" transformed
-
-function revealPassword(obfuscated) {
-  let original = '';
-  for (let i = 0; i < obfuscated.length; i++) {
-    original += String.fromCharCode(obfuscated.charCodeAt(i) - (i % 2 === 0 ? 1 : -1));
-  }
-  return original;
-}
-// --- End of Obfuscation ---
+// The base URL for the backend API, same as in admin.js
+const SYNC_BASE = "https://hobbybyrox-site.onrender.com";
 
 async function handleLogin() {
+  // Get the values from BOTH input fields using their IDs.
+  const username = $('loginIn').value;
   const password = $('password').value;
+
   const loginError = $('loginError');
   const loginBtn = $('loginBtn');
 
-  if (!password) {
-    loginError.textContent = 'Please enter a password.';
+  if (!username || !password) {
+    loginError.textContent = 'Please enter a username and password.';
     return;
   }
 
@@ -47,22 +23,28 @@ async function handleLogin() {
   loginBtn.textContent = 'Logging in...';
   loginError.textContent = '';
 
-  // De-obfuscate the stored password and compare it to the user's input
-  const correctPassword = revealPassword(OBFUSCATED_PASS);
+  try {
+    const response = await fetch(`${SYNC_BASE}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, password: password }),
+    });
 
-  // Simple delay to make it feel like a real login process
-  setTimeout(() => {
-    if (password === correctPassword) {
-      // On success, set a simple token and redirect to the admin page.
-      sessionStorage.setItem('admin_token', 'true');
+    const result = await response.json();
+
+    if (response.ok) {
+      sessionStorage.setItem('admin_token', result.token);
       window.location.href = 'admin.html';
     } else {
-      // On failure, show an error message.
-      loginError.textContent = 'Login failed. Please check your password.';
-      loginBtn.disabled = false;
-      loginBtn.textContent = 'Login';
+      loginError.textContent = result.message || 'Login failed. Please check your credentials.';
     }
-  }, 250); // 250ms delay
+  } catch (error) {
+    loginError.textContent = 'An error occurred. Please try again.';
+    console.error('Login error:', error);
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Login';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -73,7 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('loginBtn').addEventListener('click', handleLogin);
 
-  // Allow pressing Enter in the password field to submit
+  // Allow pressing Enter in either field to submit
+  $('loginIn').addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+      handleLogin();
+    }
+  });
+
   $('password').addEventListener('keyup', (event) => {
     if (event.key === 'Enter') {
       handleLogin();
