@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const inspDots = document.getElementById('inspDots');
   const inspPrev = document.getElementById('inspPrev');
   const inspNext = document.getElementById('inspNext');
+  const productModal = document.getElementById('productModal');
+  const productModalClose = document.getElementById('productModalClose');
+  const productThumbnails = document.getElementById('productThumbnails');
+  const productSlider = document.getElementById('productSlider');
+  const productDetails = document.getElementById('productDetails');
 
   let allProducts = [];
 
@@ -22,7 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(`data/inspiration.json?v=${ts}`).then(res => res.json())
   ])
   .then(([productsData, heroData, inspirationData]) => {
-    allProducts = Object.values(productsData || {});
+    allProducts = Object.keys(productsData || {}).map(key => ({
+      id: key,
+      ...productsData[key]
+    }));
 
     renderProducts(allProducts);
     renderHero(heroData);
@@ -67,6 +75,74 @@ document.addEventListener('DOMContentLoaded', () => {
       productGrid.appendChild(card);
     });
   }
+
+  function renderProductModal(product) {
+    productSlider.innerHTML = '';
+    productThumbnails.innerHTML = '';
+    productDetails.innerHTML = '';
+
+    product.images.forEach((imgUrl, index) => {
+      const img = document.createElement('img');
+      img.src = imgUrl;
+      img.alt = product.name;
+      if (index === 0) {
+        img.className = 'active';
+      }
+      productSlider.appendChild(img);
+
+      const thumb = document.createElement('img');
+      thumb.src = imgUrl;
+      thumb.alt = `Thumbnail ${index + 1}`;
+      thumb.className = 'thumbnail' + (index === 0 ? ' active' : '');
+      thumb.dataset.slide = index;
+      productThumbnails.appendChild(thumb);
+    });
+
+    productDetails.innerHTML = `
+        <h2>${product.name}</h2>
+        <p>${product.description}</p>
+        <p class="price">€ ${product.price.toFixed(2)}</p>
+        <button class="btn primary add-to-cart" data-id="${product.id}">Toevoegen aan winkelwagen</button>
+    `;
+
+    const thumbnails = productThumbnails.querySelectorAll('.thumbnail');
+    const slides = productSlider.querySelectorAll('img');
+    thumbnails.forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        thumbnails.forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+        const slideIndex = thumb.dataset.slide;
+        slides.forEach((s, i) => {
+          s.classList.toggle('active', i == slideIndex);
+        });
+      });
+    });
+  }
+
+  productGrid.addEventListener('click', (e) => {
+    if (e.target.matches('button[data-id]')) {
+      const button = e.target;
+      // Ensure it's the "Bekijk" button and not an "add to cart" button inside the modal
+      if (button.closest('.modal-content')) return;
+
+      const productId = button.dataset.id;
+      const product = allProducts.find(p => p.id === productId);
+      if (product) {
+        renderProductModal(product);
+        productModal.style.display = 'block';
+      }
+    }
+  });
+
+  productModalClose.addEventListener('click', () => {
+    productModal.style.display = 'none';
+  });
+
+  window.addEventListener('click', (e) => {
+    if (e.target === productModal) {
+        productModal.style.display = 'none';
+    }
+  });
 
   /**
    * Handles category filtering.
