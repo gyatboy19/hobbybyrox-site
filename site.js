@@ -16,8 +16,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const productThumbnails = document.getElementById('productThumbnails');
   const productSlider = document.getElementById('productSlider');
   const productDetails = document.getElementById('productDetails');
+  const cartBtn = document.getElementById('cartBtn');
+  const cartCount = document.getElementById('cartCount');
+  const cartModal = document.getElementById('cartModal');
+  const cartModalClose = document.getElementById('cartModalClose');
+  const cartItems = document.getElementById('cartItems');
+  const cartTotal = document.getElementById('cartTotal');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  const notification = document.getElementById('notification');
 
   let allProducts = [];
+  let cart = [];
 
   // Fetch all necessary data
   const ts = new Date().getTime();
@@ -134,13 +143,94 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  function addToCart(productId) {
+    const product = allProducts.find(p => p.id === productId);
+    if (product) {
+      cart.push(product);
+      updateCartCount();
+      showNotification();
+      productModal.style.display = 'none'; // Close the modal
+    }
+  }
+
+  function updateCartCount() {
+    cartCount.textContent = cart.length;
+  }
+
+  function showNotification() {
+    notification.classList.add('show');
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 2000);
+  }
+
+  function renderCartModal() {
+    cartItems.innerHTML = '';
+    if (cart.length === 0) {
+      cartItems.innerHTML = '<p>Je winkelwagen is leeg.</p>';
+      cartTotal.textContent = 'Totaal: € 0.00';
+      return;
+    }
+
+    let total = 0;
+    cart.forEach((product, index) => {
+      const item = document.createElement('div');
+      item.className = 'cart-item-container';
+      item.innerHTML = `
+        <img src="${product.thumbnail || product.images[0]}" alt="${product.name}" class="cart-item-image">
+        <div class="cart-item-details">
+          <p>${product.name}</p>
+          <p class="price">€ ${product.price.toFixed(2)}</p>
+        </div>
+        <button class="btn ghost remove-from-cart" data-index="${index}">&times;</button>
+      `;
+      cartItems.appendChild(item);
+      total += product.price;
+    });
+
+    cartTotal.textContent = `Totaal: € ${total.toFixed(2)}`;
+  }
+
+  cartModal.addEventListener('click', (e) => {
+    if (e.target.matches('.remove-from-cart')) {
+      const index = parseInt(e.target.dataset.index);
+      removeFromCart(index);
+    }
+  });
+
+  function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartCount();
+    renderCartModal();
+  }
+
+  productModal.addEventListener('click', (e) => {
+    if (e.target.matches('.add-to-cart')) {
+      const productId = e.target.dataset.id;
+      addToCart(productId);
+    }
+  });
+
   productModalClose.addEventListener('click', () => {
     productModal.style.display = 'none';
   });
 
+  cartBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    renderCartModal();
+    cartModal.style.display = 'block';
+  });
+
+  cartModalClose.addEventListener('click', () => {
+    cartModal.style.display = 'none';
+  });
+
   window.addEventListener('click', (e) => {
     if (e.target === productModal) {
-        productModal.style.display = 'none';
+      productModal.style.display = 'none';
+    }
+    if (e.target === cartModal) {
+      cartModal.style.display = 'none';
     }
   });
 
