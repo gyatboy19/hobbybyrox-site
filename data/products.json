@@ -1,13 +1,14 @@
 {
-  "1757945445947": {
-    "name": "Test",
-    "description": "Test",
-    "price": 30,
-    "category": "bruiloft",
-    "extra": "L",
+  "1757947049989": {
+    "name": "w",
+    "description": "w",
+    "price": 23,
+    "category": "seizoensboeketten",
+    "extra": "W",
     "images": [
-      "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757945447/drusol5pdcgsoxkvm9eg.png"
+      "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757947051/imaiq1hrflacw2z52jfo.png",
+      "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757947052/xtx6ug3kuvpoirsm5mj5.webp"
     ],
-    "thumbnail": "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757945447/drusol5pdcgsoxkvm9eg.png"
+    "thumbnail": "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757947051/imaiq1hrflacw2z52jfo.png"
   }
 }
