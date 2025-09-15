@@ -193,6 +193,51 @@ html,body{background:var(--bg)!important}
     right: 10px;
   }
 
+/* Cart Item Styling */
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-item:last-child {
+  border-bottom: none;
+}
+
+.cart-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.cart-item .item-details {
+  flex-grow: 1;
+}
+
+.cart-item .item-name {
+  margin: 0;
+  font-weight: 600;
+}
+
+.cart-item .item-price {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.cart-item .remove-item {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px;
+}
+
   .hero-card {
     aspect-ratio: 3/4;
     max-height: 60vh;
