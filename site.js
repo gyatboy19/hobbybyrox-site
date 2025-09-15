@@ -1,11 +1,25 @@
-// Global variables (ensure these are at the top level)
-let allProducts = [];
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
+/**
+ * Main entry point for the public-facing site.
+ * Waits for the DOM to be fully loaded, then fetches all necessary
+ * data and renders the initial view of the page.
+ */
 document.addEventListener('DOMContentLoaded', () => {
-  // ... (keep existing DOM references and initial fetches)
+  const productGrid = document.getElementById('productGrid');
+  const heroCard = document.querySelector('.hero-card');
+  const filters = document.querySelectorAll('.filters .chip');
+  const inspSlides = document.getElementById('inspSlides');
+  const inspDots = document.getElementById('inspDots');
+  const inspPrev = document.getElementById('inspPrev');
+  const inspNext = document.getElementById('inspNext');
+  const productModal = document.getElementById('productModal');
+  const productModalClose = document.getElementById('productModalClose');
+  const productThumbnails = document.getElementById('productThumbnails');
+  const productSlider = document.getElementById('productSlider');
+  const productDetails = document.getElementById('productDetails');
 
-  // Fetch data and render
+  let allProducts = [];
+
+  // Fetch all necessary data
   const ts = new Date().getTime();
   Promise.all([
     fetch(`data/products.json?v=${ts}`).then(res => res.json()),
@@ -13,155 +27,213 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(`data/inspiration.json?v=${ts}`).then(res => res.json())
   ])
   .then(([productsData, heroData, inspirationData]) => {
-    allProducts = Object.keys(productsData || {}).map(key => ({ id: key, ...productsData[key] }));
+    allProducts = Object.keys(productsData || {}).map(key => ({
+      id: key,
+      ...productsData[key]
+    }));
+
     renderProducts(allProducts);
     renderHero(heroData);
     renderInspiration(inspirationData);
-    updateCartUI();
   })
-  .catch(error => console.error('Error loading data:', error));
-
-  // Modal event delegation (refined)
-  const productModal = document.getElementById('productModal');
-  if (productModal) {
-    productModal.addEventListener('click', (e) => {
-      if (e.target.matches('.add-to-cart')) {
-        e.preventDefault(); // Prevent any default modal behavior
-        e.stopPropagation(); // Stop event bubbling to modal close
-        const productId = e.target.dataset.id;
-        console.log('Add to cart clicked for productId:', productId); // Debug
-        addToCart(productId);
-      }
-      if (e.target === productModal || e.target === document.getElementById('productModalClose')) {
-        productModal.style.display = 'none';
-      }
-    });
-  }
-
-  // ... (keep other existing event listeners like productGrid click)
-});
-
-// Render product modal (unchanged, but included for context)
-function renderProductModal(product) {
-  const productSlider = document.getElementById('productSlider');
-  const productThumbnails = document.getElementById('productThumbnails');
-  const productDetails = document.getElementById('productDetails');
-
-  productSlider.innerHTML = '';
-  productThumbnails.innerHTML = '';
-  productDetails.innerHTML = '';
-
-  product.images.forEach((imgUrl, index) => {
-    const img = document.createElement('img');
-    img.src = imgUrl;
-    img.alt = product.name;
-    if (index === 0) img.className = 'active';
-    productSlider.appendChild(img);
-
-    const thumb = document.createElement('img');
-    thumb.src = imgUrl;
-    thumb.alt = `Thumbnail ${index + 1}`;
-    thumb.className = `thumbnail ${index === 0 ? 'active' : ''}`;
-    thumb.dataset.slide = index;
-    productThumbnails.appendChild(thumb);
+  .catch(error => {
+    console.error('Error loading site data:', error);
+    if (productGrid) productGrid.innerHTML = '<p>Error loading products. Please try again later.</p>';
   });
 
-  productDetails.innerHTML = `
-    <h2>${product.name}</h2>
-    <p>${product.description || ''}</p>
-    <p>€ ${product.price.toFixed(2)}</p>
-    <button class="add-to-cart" data-id="${product.id}">Toevoegen aan winkelwagen</button>
-  `;
-
-  const thumbnails = productThumbnails.querySelectorAll('.thumbnail');
-  const slides = productSlider.querySelectorAll('img');
-  thumbnails.forEach(thumb => {
-    thumb.addEventListener('click', () => {
-      thumbnails.forEach(t => t.classList.remove('active'));
-      thumb.classList.add('active');
-      const slideIndex = parseInt(thumb.dataset.slide);
-      slides.forEach((s, i) => s.classList.toggle('active', i === slideIndex));
-    });
-  });
-}
-
-// Cart functions (ensure these are defined)
-function addToCart(productId) {
-  console.log('Attempting to add product:', productId); // Debug
-  const product = allProducts.find(p => p.id === productId);
-  if (!product) {
-    console.error('Product not found for ID:', productId);
-    return;
-  }
-
-  const existingItem = cart.find(item => item.id === productId);
-  if (existingItem) {
-    existingItem.quantity += 1;
-  } else {
-    cart.push({ ...product, quantity: 1 });
-  }
-
-  localStorage.setItem('cart', JSON.stringify(cart));
-  updateCartUI();
-  showToast(`${product.name} toegevoegd aan winkelwagen! (${cart.reduce((sum, item) => sum + item.quantity, 0)} items totaal)`);
-}
-
-function updateCartUI() {
-  const cartIndicator = document.getElementById('cartIndicator');
-  if (cartIndicator) {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartIndicator.innerHTML = totalItems > 0 ? `<span class="cart-count">${totalItems}</span> <button onclick="openCartModal()">Bekijk winkelwagen</button>` : 'Winkelwagen (leeg)';
-  }
-}
-
-function showToast(message) {
-  const toastEl = document.getElementById('toast');
-  if (toastEl) {
-    toastEl.textContent = message;
-    toastEl.style.display = 'block';
-    setTimeout(() => { toastEl.style.display = 'none'; }, 3000);
-  } else {
-    alert(message); // Fallback
-  }
-}
-
-function openCartModal() {
-  const cartModal = document.getElementById('cartModal');
-  const cartItemsContainer = document.getElementById('cartItems');
-  if (cartModal && cartItemsContainer) {
-    cartItemsContainer.innerHTML = '';
-    if (cart.length === 0) {
-      cartItemsContainer.innerHTML = '<p>Je winkelwagen is leeg.</p>';
-    } else {
-      cart.forEach(item => {
-        cartItemsContainer.innerHTML += `
-          <div>
-            <h4>${item.name}</h4>
-            <p>€ ${item.price.toFixed(2)} x ${item.quantity} = € ${(item.price * item.quantity).toFixed(2)}</p>
-            <button onclick="removeFromCart('${item.id}')">Verwijder</button>
-          </div>
-        `;
-      });
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      cartItemsContainer.innerHTML += `<p><strong>Totaal: € ${total.toFixed(2)}</strong></p><button onclick="checkout()">Afrekenen</button>`;
+  /**
+   * Renders a list of products into the product grid.
+   * Clears the existing grid and populates it with new product cards.
+   *
+   * @param {object[]} productsToRender - An array of product objects to display.
+   * @param {string} productsToRender[].id - The unique ID of the product.
+   * @param {string} productsToRender[].name - The name of the product.
+   * @param {number} productsToRender[].price - The price of the product.
+   * @param {string[]} productsToRender[].images - An array of image URLs for the product.
+   * @param {string} [productsToRender[].thumbnail] - The URL for the product's thumbnail image.
+   */
+  function renderProducts(productsToRender) {
+    if (!productGrid) return;
+    productGrid.innerHTML = '';
+    if (productsToRender.length === 0) {
+      productGrid.innerHTML = '<p>No products available at the moment.</p>';
+      return;
     }
-    cartModal.style.display = 'block';
+    productsToRender.forEach(product => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${product.thumbnail || product.images[0]}" alt="${product.name}" loading="lazy">
+        <div class="card-body">
+          <h3 class="product-name">${product.name}</h3>
+          <p class="price">€ ${product.price.toFixed(2)}</p>
+        </div>
+        <div class="add">
+            <button class="btn ghost" data-id="${product.id}">Bekijk</button>
+        </div>
+      `;
+      productGrid.appendChild(card);
+    });
   }
-}
 
-function removeFromCart(productId) {
-  cart = cart.filter(item => item.id !== productId);
-  localStorage.setItem('cart', JSON.stringify(cart));
-  openCartModal(); // Refresh modal
-  updateCartUI();
-}
+  function renderProductModal(product) {
+    productSlider.innerHTML = '';
+    productThumbnails.innerHTML = '';
+    productDetails.innerHTML = '';
 
-function checkout() {
-  alert('Afrekenen: Stuur een bericht via WhatsApp voor betaling en levering!');
-  closeCartModal();
-}
+    product.images.forEach((imgUrl, index) => {
+      const img = document.createElement('img');
+      img.src = imgUrl;
+      img.alt = product.name;
+      if (index === 0) {
+        img.className = 'active';
+      }
+      productSlider.appendChild(img);
 
-function closeCartModal() {
-  const cartModal = document.getElementById('cartModal');
-  if (cartModal) cartModal.style.display = 'none';
-}
+      const thumb = document.createElement('img');
+      thumb.src = imgUrl;
+      thumb.alt = `Thumbnail ${index + 1}`;
+      thumb.className = 'thumbnail' + (index === 0 ? ' active' : '');
+      thumb.dataset.slide = index;
+      productThumbnails.appendChild(thumb);
+    });
+
+    productDetails.innerHTML = `
+        <h2>${product.name}</h2>
+        <p>${product.description}</p>
+        <p class="price">€ ${product.price.toFixed(2)}</p>
+        <button class="btn primary add-to-cart" data-id="${product.id}">Toevoegen aan winkelwagen</button>
+    `;
+
+    const thumbnails = productThumbnails.querySelectorAll('.thumbnail');
+    const slides = productSlider.querySelectorAll('img');
+    thumbnails.forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        thumbnails.forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+        const slideIndex = thumb.dataset.slide;
+        slides.forEach((s, i) => {
+          s.classList.toggle('active', i == slideIndex);
+        });
+      });
+    });
+  }
+
+  productGrid.addEventListener('click', (e) => {
+    if (e.target.matches('button[data-id]')) {
+      const button = e.target;
+      // Ensure it's the "Bekijk" button and not an "add to cart" button inside the modal
+      if (button.closest('.modal-content')) return;
+
+      const productId = button.dataset.id;
+      const product = allProducts.find(p => p.id === productId);
+      if (product) {
+        renderProductModal(product);
+        productModal.style.display = 'block';
+      }
+    }
+  });
+
+  productModalClose.addEventListener('click', () => {
+    productModal.style.display = 'none';
+  });
+
+  window.addEventListener('click', (e) => {
+    if (e.target === productModal) {
+        productModal.style.display = 'none';
+    }
+  });
+
+  /**
+   * Handles category filtering.
+   * Adds click event listeners to the category filter chips.
+   */
+  filters.forEach(filter => {
+    filter.addEventListener('click', () => {
+      filters.forEach(f => f.classList.remove('active'));
+      filter.classList.add('active');
+      const category = filter.dataset.filter;
+      if (category === 'all') {
+        renderProducts(allProducts);
+      } else {
+        const filteredProducts = allProducts.filter(p => p.category === category);
+        renderProducts(filteredProducts);
+      }
+    });
+  });
+
+  /**
+   * Renders the hero image.
+   * Takes the first image from the hero data and displays it in the hero card.
+   *
+   * @param {object} heroData - The hero data object.
+   * @param {string[]} heroData.images - An array of image URLs for the hero section.
+   */
+  function renderHero(heroData) {
+    if (!heroCard || !heroData.images || heroData.images.length === 0) return;
+    const heroImg = document.createElement('img');
+    heroImg.src = heroData.images[0];
+    heroImg.alt = "Hero image";
+    heroCard.appendChild(heroImg);
+  }
+
+  /**
+   * Renders the inspiration slideshow.
+   * Creates slides and navigation dots for each inspiration item.
+   * Also sets up event listeners for the previous/next buttons and dots.
+   *
+   * @param {object} inspirationData - The inspiration data object.
+   * @param {string[]} inspirationData.items - An array of image URLs for the inspiration slideshow.
+   */
+  function renderInspiration(inspirationData) {
+    if (!inspSlides || !inspirationData.items || inspirationData.items.length === 0) return;
+
+    const items = inspirationData.items;
+    let currentSlide = 0;
+
+    items.forEach((item, index) => {
+      const slide = document.createElement('div');
+      slide.className = 'slide' + (index === 0 ? ' active' : '');
+      slide.innerHTML = `<img src="${item}" alt="Inspiration image ${index + 1}">`;
+      inspSlides.appendChild(slide);
+
+      const dot = document.createElement('span');
+      dot.className = 'dot' + (index === 0 ? ' active' : '');
+      dot.dataset.slide = index;
+      inspDots.appendChild(dot);
+    });
+
+    const slides = inspSlides.querySelectorAll('.slide');
+    const dots = inspDots.querySelectorAll('.dot');
+
+    /**
+     * Shows a specific slide in the slideshow.
+     * @param {number} index - The index of the slide to show.
+     */
+    function showSlide(index) {
+      slides.forEach(s => s.classList.remove('active'));
+      dots.forEach(d => d.classList.remove('active'));
+      slides[index].classList.add('active');
+      dots[index].classList.add('active');
+      currentSlide = index;
+    }
+
+    inspPrev.addEventListener('click', () => {
+      let newIndex = currentSlide - 1;
+      if (newIndex < 0) newIndex = items.length - 1;
+      showSlide(newIndex);
+    });
+
+    inspNext.addEventListener('click', () => {
+      let newIndex = currentSlide + 1;
+      if (newIndex >= items.length) newIndex = 0;
+      showSlide(newIndex);
+    });
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        showSlide(parseInt(dot.dataset.slide));
+      });
+    });
+  }
+});
