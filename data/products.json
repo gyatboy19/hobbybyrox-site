@@ -1,13 +1,13 @@
 {
-  "1757938276423": {
-    "name": "WDADA",
-    "description": "WADAD",
-    "price": 332,
-    "category": "seizoensboeketten",
-    "extra": "s",
+  "1757945445947": {
+    "name": "Test",
+    "description": "Test",
+    "price": 30,
+    "category": "bruiloft",
+    "extra": "L",
     "images": [
-      "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757938278/clh5ogooc5rij5jd6zkt.png"
+      "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757945447/drusol5pdcgsoxkvm9eg.png"
     ],
-    "thumbnail": "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757938278/clh5ogooc5rij5jd6zkt.png"
+    "thumbnail": "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757945447/drusol5pdcgsoxkvm9eg.png"
   }
 }
