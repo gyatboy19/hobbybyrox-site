@@ -4,6 +4,7 @@
  * data and renders the initial view of the page.
  */
 document.addEventListener('DOMContentLoaded', () => {
+  // --- DOM & Data Initialization ---
   const productGrid = document.getElementById('productGrid');
   const heroCard = document.querySelector('.hero-card');
   const filters = document.querySelectorAll('.filters .chip');
@@ -11,13 +12,121 @@ document.addEventListener('DOMContentLoaded', () => {
   const inspDots = document.getElementById('inspDots');
   const inspPrev = document.getElementById('inspPrev');
   const inspNext = document.getElementById('inspNext');
+  const notification = document.getElementById('notification');
+
+  // Product Modal
   const productModal = document.getElementById('productModal');
   const productModalClose = document.getElementById('productModalClose');
   const productThumbnails = document.getElementById('productThumbnails');
   const productSlider = document.getElementById('productSlider');
   const productDetails = document.getElementById('productDetails');
 
+  // Cart
+  const cartBtn = document.getElementById('cartBtn');
+  const cartCount = document.getElementById('cartCount');
+  const cartModal = document.getElementById('cartModal');
+  const cartModalClose = document.getElementById('cartModalClose');
+  const cartItems = document.getElementById('cartItems');
+  const cartTotal = document.getElementById('cartTotal');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+
+  // Checkout Options Modal
+  const checkoutOptionsModal = document.getElementById('checkoutOptionsModal');
+  const checkoutOptionsClose = document.getElementById('checkoutOptionsClose');
+  const whatsappBtn = document.getElementById('whatsappBtn');
+  const emailBtn = document.getElementById('emailBtn');
+
+
   let allProducts = [];
+  let cart = [];
+
+  /**
+   * Loads the cart from localStorage and updates the cart count.
+   */
+  function loadCart() {
+    const storedCart = localStorage.getItem('hobbybyrox_cart');
+    if (storedCart) {
+      cart = JSON.parse(storedCart);
+      updateCartCount();
+    }
+  }
+
+  /**
+   * Saves the current cart state to localStorage.
+   */
+  function saveCart() {
+    localStorage.setItem('hobbybyrox_cart', JSON.stringify(cart));
+  }
+
+  /**
+   * Updates the cart count displayed in the header.
+   */
+  function updateCartCount() {
+    cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  /**
+   * Adds a product to the cart, or increments its quantity if it already exists.
+   * @param {string} productId - The ID of the product to add.
+   */
+  function addToCart(productId) {
+    const existingItem = cart.find(item => item.id === productId);
+    if (existingItem) {
+      existingItem.quantity++;
+    } else {
+      const product = allProducts.find(p => p.id === productId);
+      if (product) {
+        cart.push({ ...product, quantity: 1 });
+      }
+    }
+    saveCart();
+    updateCartCount();
+    showNotification();
+  }
+
+  /**
+   * Renders the items in the shopping cart modal.
+   */
+  function renderCart() {
+    cartItems.innerHTML = '';
+    let total = 0;
+    if (cart.length === 0) {
+      cartItems.innerHTML = '<p>Je winkelwagen is leeg.</p>';
+      cartTotal.textContent = 'Totaal: € 0,00';
+      return;
+    }
+
+    cart.forEach(item => {
+      const itemElement = document.createElement('div');
+      itemElement.className = 'cart-item';
+      itemElement.innerHTML = `
+        <img src="${item.thumbnail || item.images[0]}" alt="${item.name}" />
+        <div class="item-details">
+          <p class="item-name">${item.name} (x${item.quantity})</p>
+          <p class="item-price">€ ${(item.price * item.quantity).toFixed(2)}</p>
+        </div>
+        <button class="remove-item" data-id="${item.id}">&times;</button>
+      `;
+      cartItems.appendChild(itemElement);
+      total += item.price * item.quantity;
+    });
+
+    cartTotal.textContent = `Totaal: € ${total.toFixed(2)}`;
+  }
+
+  /**
+   * Shows a brief notification message.
+   * @param {string} message - The message to display.
+   */
+  function showNotification() {
+    notification.classList.add('show');
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 2000);
+  }
+
+  // Initial load
+  loadCart();
 
   // Fetch all necessary data
   const ts = new Date().getTime();
@@ -236,4 +345,90 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // --- Event Listeners ---
+
+  // Product Modal: Add to Cart
+  productDetails.addEventListener('click', (e) => {
+    if (e.target.matches('.add-to-cart')) {
+      const productId = e.target.dataset.id;
+      addToCart(productId);
+      productModal.style.display = 'none'; // Close modal after adding
+    }
+  });
+
+  // Cart Modal: Open and Close
+  cartBtn.addEventListener('click', () => {
+    renderCart();
+    cartModal.style.display = 'block';
+  });
+
+  cartModalClose.addEventListener('click', () => {
+    cartModal.style.display = 'none';
+  });
+
+  // Cart Modal: Remove Item
+  cartItems.addEventListener('click', (e) => {
+    if (e.target.matches('.remove-item')) {
+      const productId = e.target.dataset.id;
+      const itemIndex = cart.findIndex(item => item.id === productId);
+      if (itemIndex > -1) {
+        cart[itemIndex].quantity--;
+        if (cart[itemIndex].quantity === 0) {
+          cart.splice(itemIndex, 1);
+        }
+        saveCart();
+        updateCartCount();
+        renderCart(); // Re-render the cart modal to show changes
+      }
+    }
+  });
+
+  // Global: Close modals on outside click
+  window.addEventListener('click', (e) => {
+    if (e.target === cartModal) {
+      cartModal.style.display = 'none';
+    }
+    if (e.target === checkoutOptionsModal) {
+      checkoutOptionsModal.style.display = 'none';
+    }
+  });
+
+  // --- Checkout Logic ---
+
+  checkoutBtn.addEventListener('click', () => {
+    if (cart.length > 0) {
+      cartModal.style.display = 'none';
+      checkoutOptionsModal.style.display = 'block';
+    } else {
+      alert("Je winkelwagen is leeg!");
+    }
+  });
+
+  checkoutOptionsClose.addEventListener('click', () => {
+    checkoutOptionsModal.style.display = 'none';
+  });
+
+  function generateOrderText() {
+    let message = "Hallo! Ik wil graag een bestelling plaatsen voor de volgende items:\n\n";
+    let total = 0;
+    cart.forEach(item => {
+      message += `- ${item.name} (x${item.quantity}) - €${(item.price * item.quantity).toFixed(2)}\n`;
+      total += item.price * item.quantity;
+    });
+    message += `\nTotaal: €${total.toFixed(2)}`;
+    return message;
+  }
+
+  whatsappBtn.addEventListener('click', () => {
+    const message = generateOrderText();
+    const whatsappUrl = `https://wa.me/31644999980?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  });
+
+  emailBtn.addEventListener('click', () => {
+    const message = generateOrderText();
+    const emailUrl = `mailto:hobbybyrox@gmail.com?subject=Bestelling via website&body=${encodeURIComponent(message)}`;
+    window.location.href = emailUrl;
+  });
 });
