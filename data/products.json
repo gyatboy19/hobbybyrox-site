@@ -1,14 +1,13 @@
 {
-  "1757947049989": {
-    "name": "w",
-    "description": "w",
-    "price": 23,
-    "category": "seizoensboeketten",
-    "extra": "W",
+  "1758027366677": {
+    "name": "Verlicht Roze Leeuw Boeket",
+    "description": "boeket met roze rozen, LED-verlichting en pluimgras in een gouden leeuwenvaas.",
+    "price": 50,
+    "category": "tafelstuk",
+    "extra": "L",
     "images": [
-      "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757947051/imaiq1hrflacw2z52jfo.png",
-      "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757947052/xtx6ug3kuvpoirsm5mj5.webp"
+      "https://res.cloudinary.com/dqj5kjabl/image/upload/v1758027366/cybpbf8oju9aj35t3jjd.jpg"
     ],
-    "thumbnail": "https://res.cloudinary.com/dqj5kjabl/image/upload/v1757947051/imaiq1hrflacw2z52jfo.png"
+    "thumbnail": "https://res.cloudinary.com/dqj5kjabl/image/upload/v1758027366/cybpbf8oju9aj35t3jjd.jpg"
   }
 }
