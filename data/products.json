@@ -20,5 +20,16 @@
       "https://res.cloudinary.com/dqj5kjabl/image/upload/v1758027614/qehe77ferr4pz2vjuzhn.jpg"
     ],
     "thumbnail": "https://res.cloudinary.com/dqj5kjabl/image/upload/v1758027614/qehe77ferr4pz2vjuzhn.jpg"
+  },
+  "1758027927054": {
+    "name": "Uniek Roze Boeket",
+    "description": "Mooi boeket met roze pioenrozen, rode chrysant, witte pluimen en eucalyptus in een unieke bronzen maskervaas.",
+    "price": 25,
+    "category": "seizoensboeketten",
+    "extra": "M",
+    "images": [
+      "https://res.cloudinary.com/dqj5kjabl/image/upload/v1758027927/j14yvykmy7wgzsaz6rqy.jpg"
+    ],
+    "thumbnail": "https://res.cloudinary.com/dqj5kjabl/image/upload/v1758027927/j14yvykmy7wgzsaz6rqy.jpg"
   }
 }
